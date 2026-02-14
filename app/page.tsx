@@ -71,13 +71,13 @@ export default function HomePage() {
     }))
     setHearts(newHearts)
 
-    // Generate Glowing Hearts (Dark Mode)
+    // Generate Glowing Hearts (Dark Mode) - FIXED: Same parameters as light mode
     const newGlowingHearts = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      duration: 15 + Math.random() * 20, // Same duration range as light mode
-      delay: Math.random() * -35, // Same delay range as light mode
-      scale: 0.5 + Math.random() * 0.7,
+      duration: 15 + Math.random() * 20, // Same as light mode
+      delay: Math.random() * -35, // Same as light mode
+      scale: 0.5 + Math.random() * 0.7, // Same as light mode
       color: "text-red-400",
       rotation: Math.random() * 30 - 15,
       sway: Math.random() * 100 - 50,
@@ -135,6 +135,7 @@ export default function HomePage() {
         .festival-object {
           position: absolute;
           top: 0;
+          left: 0;
           animation-name: fullScreenFloat;
           animation-timing-function: linear;
           animation-iteration-count: infinite;
@@ -177,7 +178,7 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* DARK MODE: GLOWING HEARTS - NOW WITH SAME ANIMATION */}
+          {/* DARK MODE: GLOWING HEARTS - FIXED: Added festival-object class for movement */}
           <div className="hidden dark:block w-full h-full">
             {glowingHearts.map((heart) => (
               <div
@@ -196,7 +197,7 @@ export default function HomePage() {
               >
                 <div className="relative w-full h-full">
                   <div className="absolute inset-0 bg-red-500 blur-[20px] opacity-40 rounded-full scale-150"></div>
-                  <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '100%', height: '100%', filter: 'drop-shadow(0 0 15px currentColor)' }}>
+                  <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '100%', height: '100%' }}>
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                   </svg>
                 </div>
