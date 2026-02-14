@@ -42,6 +42,7 @@ export function Header() {
     pathname === "/admin/login" ||
     pathname === "/tutor/login" ||
     pathname === "/" ||
+    pathname === "/accounts-personnel/login" ||
     pathname === "/admin-personnel/login" ||
     pathname === "/technical/login" ||
     pathname === "/peon/login"
