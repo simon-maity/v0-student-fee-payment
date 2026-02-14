@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { DollarSign, Eye, EyeOff, Sun, Moon } from "lucide-react"
+import { DollarSign, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { useTheme } from "next-themes"
 
 declare global {
   interface Window {
@@ -35,16 +34,10 @@ export default function AccountsPersonnelLogin() {
   const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null)
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
-  const { theme, setTheme } = useTheme()
   const turnstileContainerRef = useRef<HTMLDivElement>(null)
   const turnstileWidgetRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Initialize and manage Turnstile
   useEffect(() => {
@@ -89,7 +82,7 @@ export default function AccountsPersonnelLogin() {
         try {
           turnstileWidgetRef.current = window.turnstile.render("#turnstile-container-accounts", {
             sitekey: turnstileSiteKey,
-            theme: theme === "dark" ? "dark" : "light",
+            theme: "light",
             callback: (token: string) => {
               console.log("[v0] Turnstile verified successfully, token length:", token.length)
               setIsCaptchaVerified(true)
@@ -129,23 +122,8 @@ export default function AccountsPersonnelLogin() {
       if (document.body.contains(script)) {
         document.body.removeChild(script)
       }
-      if (turnstileWidgetRef.current) {
-        // Clean up Turnstile widget
-        const container = document.getElementById("turnstile-container-accounts")
-        if (container) {
-          container.innerHTML = ""
-        }
-        turnstileWidgetRef.current = null
-      }
     }
-  }, [turnstileSiteKey, theme])
-
-  // Reset Turnstile when theme changes
-  useEffect(() => {
-    if (turnstileWidgetRef.current && window.turnstile) {
-      window.turnstile.reset(turnstileWidgetRef.current)
-    }
-  }, [theme])
+  }, [turnstileSiteKey])
 
   // Manage lockout timer
   useEffect(() => {
@@ -199,13 +177,13 @@ export default function AccountsPersonnelLogin() {
       })
 
       const data = await response.json()
-      console.log("[v0] Login response:", {
-        status: response.status,
+      console.log("[v0] Login response:", { 
+        status: response.status, 
         ok: response.ok,
-        success: data.success,
+        success: data.success, 
         message: data.message,
         error: data.error,
-        hasToken: !!data.token
+        hasToken: !!data.token 
       })
 
       if (response.ok && data.success) {
@@ -229,7 +207,7 @@ export default function AccountsPersonnelLogin() {
         router.push("/accounts-personnel/dashboard")
       } else {
         console.log("[v0] Login failed with response:", data)
-
+        
         // Only increment failed attempts for non-CAPTCHA errors
         if (!data.message?.includes("CAPTCHA")) {
           const newAttempts = failedAttempts + 1
@@ -263,125 +241,34 @@ export default function AccountsPersonnelLogin() {
     }
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }
-
-  if (!mounted) {
-    return null
-  }
-
-  const isDarkMode = theme === "dark"
-
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 relative"
-      style={{
-        background: isDarkMode
-          ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
-          : 'linear-gradient(135deg, #fff5f7 0%, #ffe4e6 100%)'
-      }}
-    >
-      {/* Theme Toggle Button */}
-      <button
-        onClick={toggleTheme}
-        className="absolute top-4 right-4 p-2 rounded-full transition-all duration-200 z-10"
-        style={{
-          background: isDarkMode ? '#374151' : '#f3f4f6',
-          color: isDarkMode ? '#fbb6ce' : '#e11d48',
-          border: isDarkMode ? '1px solid #4b5563' : '1px solid #e5e7eb'
-        }}
-        aria-label="Toggle theme"
-      >
-        {isDarkMode ? (
-          <Sun className="h-5 w-5" />
-        ) : (
-          <Moon className="h-5 w-5" />
-        )}
-      </button>
-
-      <Card className="w-full max-w-md" style={{
-        border: isDarkMode ? '2px solid #7f1d1d' : '2px solid #fecdd3',
-        boxShadow: isDarkMode
-          ? '0 10px 25px rgba(127, 29, 29, 0.3)'
-          : '0 10px 25px rgba(244, 63, 94, 0.1)',
-        backgroundColor: isDarkMode ? '#1f2937' : 'white'
-      }}>
-        <CardHeader className="space-y-1 text-center relative">
-          {/* Background pattern for better text visibility */}
-          <div className="absolute inset-0 rounded-t-lg opacity-5" style={{
-            background: isDarkMode
-              ? 'linear-gradient(45deg, #fbb6ce 25%, transparent 25%, transparent 50%, #fbb6ce 50%, #fbb6ce 75%, transparent 75%, transparent)'
-              : 'linear-gradient(45deg, #e11d48 25%, transparent 25%, transparent 50%, #e11d48 50%, #e11d48 75%, transparent 75%, transparent)',
-            backgroundSize: '20px 20px'
-          }} />
-
-          <div className="flex justify-center mb-4 relative z-10">
-            <div className="p-3 rounded-full" style={{
-              background: isDarkMode
-                ? 'linear-gradient(135deg, #7f1d1d 0%, #9f1239 100%)'
-                : 'linear-gradient(135deg, #fecdd3 0%, #fda4af 100%)',
-              boxShadow: isDarkMode
-                ? '0 4px 6px rgba(127, 29, 29, 0.4)'
-                : '0 4px 6px rgba(244, 63, 94, 0.2)'
-            }}>
-              <DollarSign className="h-8 w-8" style={{
-                color: isDarkMode ? '#fbb6ce' : '#e11d48'
-              }} />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
+              <DollarSign className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
           </div>
-
-          <CardTitle className="text-2xl font-bold relative z-10" style={{
-            color: isDarkMode ? '#fbb6ce' : '#e11d48',
-            textShadow: isDarkMode
-              ? '0 2px 4px rgba(0, 0, 0, 0.5)'
-              : '0 2px 4px rgba(225, 29, 72, 0.2)'
-          }}>
-            Accounts Personnel
-          </CardTitle>
-
-          <CardDescription className="relative z-10" style={{
-            color: isDarkMode ? '#d1d5db' : '#6b7280',
-            textShadow: isDarkMode ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'
-          }}>
-            Sign in to manage fees and financial operations
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">Accounts Personnel</CardTitle>
+          <CardDescription>Sign in to manage fees and payments</CardDescription>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
-              <Alert variant="destructive" style={{
-                borderColor: isDarkMode ? '#9f1239' : '#fda4af',
-                backgroundColor: isDarkMode ? '#2d1b1b' : '#fff1f2'
-              }}>
-                <AlertDescription style={{
-                  color: isDarkMode ? '#fecaca' : '#be123c'
-                }}>
-                  {error}
-                </AlertDescription>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {lockoutTime > 0 && (
-              <Alert variant="destructive" style={{
-                borderColor: isDarkMode ? '#9f1239' : '#fda4af',
-                backgroundColor: isDarkMode ? '#2d1b1b' : '#fff1f2'
-              }}>
-                <AlertDescription style={{
-                  color: isDarkMode ? '#fecaca' : '#be123c'
-                }}>
-                  Account locked. Try again in {Math.ceil(lockoutTime / 1000)} seconds.
-                </AlertDescription>
+              <Alert variant="destructive">
+                <AlertDescription>Account locked. Try again in {Math.ceil(lockoutTime / 1000)} seconds.</AlertDescription>
               </Alert>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username" style={{
-                color: isDarkMode ? '#e5e7eb' : '#374151'
-              }}>
-                Username
-              </Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
@@ -390,32 +277,11 @@ export default function AccountsPersonnelLogin() {
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading || lockoutTime > 0}
                 required
-                className={isDarkMode ? "dark" : ""}
-                style={{
-                  borderColor: isDarkMode ? '#4b5563' : '#fecaca',
-                  backgroundColor: isDarkMode ? '#374151' : 'white',
-                  color: isDarkMode ? '#f3f4f6' : '#111827',
-                  outline: 'none'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = isDarkMode ? '#fbb6ce' : '#e11d48';
-                  e.target.style.boxShadow = isDarkMode
-                    ? '0 0 0 3px rgba(251, 182, 206, 0.2)'
-                    : '0 0 0 3px rgba(225, 29, 72, 0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = isDarkMode ? '#4b5563' : '#fecaca';
-                  e.target.style.boxShadow = 'none';
-                }}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" style={{
-                color: isDarkMode ? '#e5e7eb' : '#374151'
-              }}>
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -425,43 +291,12 @@ export default function AccountsPersonnelLogin() {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading || lockoutTime > 0}
                   required
-                  className={isDarkMode ? "dark pr-10" : "pr-10"}
-                  style={{
-                    borderColor: isDarkMode ? '#4b5563' : '#fecaca',
-                    backgroundColor: isDarkMode ? '#374151' : 'white',
-                    color: isDarkMode ? '#f3f4f6' : '#111827',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = isDarkMode ? '#fbb6ce' : '#e11d48';
-                    e.target.style.boxShadow = isDarkMode
-                      ? '0 0 0 3px rgba(251, 182, 206, 0.2)'
-                      : '0 0 0 3px rgba(225, 29, 72, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = isDarkMode ? '#4b5563' : '#fecaca';
-                    e.target.style.boxShadow = 'none';
-                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   disabled={loading || lockoutTime > 0}
-                  style={{
-                    color: isDarkMode ? '#fbb6ce' : '#9f1239',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: loading || lockoutTime > 0 ? 'not-allowed' : 'pointer'
-                  }}
-                  onMouseOver={(e) => {
-                    if (!loading && lockoutTime === 0) {
-                      e.currentTarget.style.color = isDarkMode ? '#f9a8d4' : '#e11d48';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.color = isDarkMode ? '#fbb6ce' : '#9f1239';
-                  }}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -469,72 +304,20 @@ export default function AccountsPersonnelLogin() {
             </div>
 
             {captchaError && (
-              <Alert variant="destructive" style={{
-                borderColor: isDarkMode ? '#9f1239' : '#fda4af',
-                backgroundColor: isDarkMode ? '#2d1b1b' : '#fff1f2'
-              }}>
-                <AlertDescription style={{
-                  color: isDarkMode ? '#fecaca' : '#be123c'
-                }}>
-                  {captchaError}
-                </AlertDescription>
+              <Alert variant="destructive">
+                <AlertDescription>{captchaError}</AlertDescription>
               </Alert>
             )}
 
             <div ref={turnstileContainerRef} id="turnstile-container-accounts" className="flex justify-center" />
 
-            <Button
-              type="submit"
-              className="w-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button 
+              type="submit" 
+              className="w-full" 
               disabled={loading || lockoutTime > 0 || !isCaptchaVerified}
-              style={{
-                background: isDarkMode
-                  ? 'linear-gradient(135deg, #9f1239 0%, #7f1d1d 100%)'
-                  : 'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)',
-                border: 'none',
-                boxShadow: isDarkMode
-                  ? '0 4px 6px rgba(159, 18, 57, 0.3)'
-                  : '0 4px 6px rgba(225, 29, 72, 0.2)',
-                color: 'white'
-              }}
-              onMouseOver={(e) => {
-                if (!loading && lockoutTime === 0 && isCaptchaVerified) {
-                  e.currentTarget.style.background = isDarkMode
-                    ? 'linear-gradient(135deg, #be123c 0%, #9f1239 100%)'
-                    : 'linear-gradient(135deg, #be123c 0%, #e11d48 100%)';
-                  e.currentTarget.style.boxShadow = isDarkMode
-                    ? '0 6px 8px rgba(190, 18, 60, 0.4)'
-                    : '0 6px 8px rgba(190, 18, 60, 0.3)';
-                }
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = isDarkMode
-                  ? 'linear-gradient(135deg, #9f1239 0%, #7f1d1d 100%)'
-                  : 'linear-gradient(135deg, #e11d48 0%, #f43f5e 100%)';
-                e.currentTarget.style.boxShadow = isDarkMode
-                  ? '0 4px 6px rgba(159, 18, 57, 0.3)'
-                  : '0 4px 6px rgba(225, 29, 72, 0.2)';
-              }}
             >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </span>
-              ) : (
-                "Sign In"
-              )}
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
-
-            <div className="text-center text-sm mt-4" style={{
-              color: isDarkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              <p>For authorized accounts personnel only</p>
-              <p className="text-xs mt-1">All activities are monitored and logged</p>
-            </div>
           </form>
         </CardContent>
       </Card>
