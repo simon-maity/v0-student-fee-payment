@@ -8,25 +8,26 @@ import { Users, Award, ShieldHalf, GraduationCap, BookOpen, UserCheck, Monitor, 
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 
-// --- FESTIVAL CONFIGURATION ---
-interface FestivalItem {
+// --- BEACH CONFIGURATION ---
+interface BeachItem {
   id: number
   left: number // Horizontal position %
   duration: number // Speed
   delay: number // Stagger start
   scale: number // Size
-  color: string // Color class
   rotation: number // Initial rotation
   sway: number // Random horizontal sway
+  top?: number // For people position
 }
 
 export default function HomePage() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
 
-  // --- FESTIVAL STATE ---
-  const [kites, setKites] = useState<FestivalItem[]>([])
-  const [lanterns, setLanterns] = useState<FestivalItem[]>([])
+  // --- BEACH STATE ---
+  const [coconuts, setCoconuts] = useState<BeachItem[]>([])
+  const [people, setPeople] = useState<BeachItem[]>([])
+  const [shootingStars, setShootingStars] = useState<BeachItem[]>([])
 
   // --- SECRET MENU LOGIC ---
   const [showHidden, setShowHidden] = useState(false)
@@ -55,34 +56,44 @@ export default function HomePage() {
     localStorage.removeItem("technicalTeamAuth")
     localStorage.removeItem("technicalTeamData")
 
-    // --- GENERATE FESTIVAL ITEMS ---
-    const kiteColors = ["text-red-500", "text-blue-600", "text-orange-500", "text-purple-600", "text-pink-500", "text-green-600", "text-yellow-500"];
+    // --- GENERATE BEACH ITEMS ---
     
-    // Generate Kites (Light Mode)
-    const newKites = Array.from({ length: 30 }).map((_, i) => ({
+    // Generate Coconuts (for both modes)
+    const newCoconuts = Array.from({ length: 25 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      duration: 15 + Math.random() * 20, // 15-35 seconds
-      delay: Math.random() * -35,
-      scale: 0.5 + Math.random() * 0.7,
-      color: kiteColors[Math.floor(Math.random() * kiteColors.length)],
-      rotation: Math.random() * 30 - 15,
+      duration: 8 + Math.random() * 12, // 8-20 seconds
+      delay: Math.random() * -15,
+      scale: 0.3 + Math.random() * 0.5,
+      rotation: Math.random() * 360,
+      sway: Math.random() * 40 - 20,
+    }))
+    setCoconuts(newCoconuts)
+
+    // Generate People walking on beach (for both modes)
+    const newPeople = Array.from({ length: 15 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: 60 + Math.random() * 30, // Bottom portion of screen
+      duration: 20 + Math.random() * 25, // 20-45 seconds
+      delay: Math.random() * -20,
+      scale: 0.4 + Math.random() * 0.4,
+      rotation: 0,
       sway: Math.random() * 100 - 50,
     }))
-    setKites(newKites)
+    setPeople(newPeople)
 
-    // Generate Lanterns (Dark Mode)
-    const newLanterns = Array.from({ length: 20 }).map((_, i) => ({
+    // Generate Shooting Stars (only for dark mode)
+    const newShootingStars = Array.from({ length: 12 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      duration: 25 + Math.random() * 25,
-      delay: Math.random() * -50,
-      scale: 0.6 + Math.random() * 0.6,
-      color: "text-orange-400",
-      rotation: Math.random() * 10 - 5,
-      sway: Math.random() * 60 - 30,
+      duration: 3 + Math.random() * 4, // 3-7 seconds - fast!
+      delay: Math.random() * -10,
+      scale: 0.5 + Math.random() * 0.8,
+      rotation: -25 + Math.random() * 10, // Diagonal angle
+      sway: Math.random() * 200 - 100,
     }))
-    setLanterns(newLanterns)
+    setShootingStars(newShootingStars)
 
   }, [])
 
@@ -110,15 +121,31 @@ export default function HomePage() {
   return (
     <div
       className="relative min-h-screen
-      bg-gradient-to-br from-gray-100 via-white to-gray-200
-      dark:from-[#0a0a0f] dark:via-[#1a1a28] dark:to-[#0f0f1a]
+      bg-gradient-to-br from-sky-100 via-amber-50 to-sky-200
+      dark:from-[#0a0f1a] dark:via-[#141b2b] dark:to-[#0b1424]
       text-gray-900 dark:text-white transition-all duration-300 overflow-x-hidden"
     >
-      {/* --- INLINE STYLES FOR FESTIVAL ANIMATION --- */}
+      {/* --- INLINE STYLES FOR BEACH ANIMATION --- */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes fullScreenFloat {
+        @keyframes coconutFall {
           0% { 
-            transform: translateY(110vh) translateX(0) rotate(0deg); 
+            transform: translateY(-20vh) rotate(0deg); 
+            opacity: 0; 
+          }
+          20% { 
+            opacity: 1; 
+          }
+          80% { 
+            opacity: 1; 
+          }
+          100% { 
+            transform: translateY(120vh) rotate(360deg) translateX(var(--sway)); 
+            opacity: 0; 
+          }
+        }
+        @keyframes peopleWalk {
+          0% { 
+            transform: translateX(-100vw) translateY(0); 
             opacity: 0; 
           }
           10% { 
@@ -128,86 +155,189 @@ export default function HomePage() {
             opacity: 1; 
           }
           100% { 
-            transform: translateY(-20vh) translateX(var(--sway)) rotate(10deg); 
+            transform: translateX(100vw) translateY(var(--sway)); 
             opacity: 0; 
           }
         }
-        .festival-object {
+        @keyframes shootingStar {
+          0% { 
+            transform: translateX(-50vw) translateY(-30vh) rotate(-25deg); 
+            opacity: 0; 
+          }
+          20% { 
+            opacity: 1; 
+          }
+          80% { 
+            opacity: 1; 
+          }
+          100% { 
+            transform: translateX(50vw) translateY(30vh) rotate(-25deg); 
+            opacity: 0; 
+          }
+        }
+        .beach-coconut {
           position: absolute;
           top: 0;
-          animation-name: fullScreenFloat;
+          animation-name: coconutFall;
           animation-timing-function: linear;
           animation-iteration-count: infinite;
           z-index: 0;
           pointer-events: none;
           will-change: transform;
         }
+        .beach-people {
+          position: absolute;
+          bottom: 15%;
+          animation-name: peopleWalk;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+          z-index: 0;
+          pointer-events: none;
+          will-change: transform;
+        }
+        .shooting-star {
+          position: absolute;
+          top: 20%;
+          animation-name: shootingStar;
+          animation-timing-function: cubic-bezier(0.1, 0.8, 0.3, 1);
+          animation-iteration-count: infinite;
+          z-index: 0;
+          pointer-events: none;
+          filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+          will-change: transform;
+        }
       `}} />
 
-      {/* --- FESTIVAL LAYER (FIXED BACKGROUND) --- */}
+      {/* --- BEACH BACKGROUND LAYER --- */}
       <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden z-[1]">
-          {/* LIGHT MODE: KITES */}
-          <div className="block dark:hidden w-full h-full">
-            {kites.map((kite) => (
-              <div
-                key={kite.id}
-                className={`festival-object ${kite.color}`}
-                style={{
-                  left: `${kite.left}%`,
-                  // @ts-ignore
-                  "--sway": `${kite.sway}px`,
-                  animationDuration: `${kite.duration}s`,
-                  animationDelay: `${kite.delay}s`,
-                  transformOrigin: "center center",
-                  width: `${60 * kite.scale}px`,
-                  height: `${80 * kite.scale}px`,
-                }}
-              >
-                <svg viewBox="0 0 50 70" fill="currentColor" style={{ filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.15))', width: '100%', height: '100%' }}>
-                  <path d="M25 0 L50 25 L25 50 L0 25 Z" />
-                  <path d="M25 0 L25 50" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" />
-                  <path d="M0 25 L50 25" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" />
-                  <path d="M25 50 L32 65 L18 65 Z" fill="currentColor" opacity="0.9" />
-                  <path d="M25 65 Q 25 80 15 90" stroke="rgba(0,0,0,0.2)" strokeWidth="1" fill="none" />
+        {/* Ocean horizon line */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-amber-300/30 to-transparent dark:from-blue-900/40 dark:to-transparent"></div>
+        
+        {/* Sand dunes effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-amber-200/40 to-transparent dark:from-amber-900/20 dark:to-transparent"></div>
+        
+        {/* Coconut trees - static background elements */}
+        <div className="absolute bottom-0 left-[5%] w-16 h-48 opacity-70 dark:opacity-50 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 w-2 h-40 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
+          <div className="absolute bottom-36 left-1/2 -translate-x-1/2 w-20 h-20 bg-green-700 dark:bg-green-900 rounded-full blur-sm"></div>
+        </div>
+        <div className="absolute bottom-0 right-[8%] w-20 h-56 opacity-70 dark:opacity-50 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 w-3 h-48 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
+          <div className="absolute bottom-44 left-1/2 -translate-x-1/2 w-24 h-24 bg-green-700 dark:bg-green-900 rounded-full blur-sm"></div>
+        </div>
+        <div className="absolute bottom-0 left-[15%] w-16 h-40 opacity-60 dark:opacity-40 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 w-2 h-32 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
+          <div className="absolute bottom-28 left-1/2 -translate-x-1/2 w-16 h-16 bg-green-700 dark:bg-green-900 rounded-full blur-sm"></div>
+        </div>
+
+        {/* FALLING COCONUTS - Both modes */}
+        <div className="w-full h-full">
+          {coconuts.map((coconut) => (
+            <div
+              key={`coconut-${coconut.id}`}
+              className="beach-coconut"
+              style={{
+                left: `${coconut.left}%`,
+                // @ts-ignore
+                "--sway": `${coconut.sway}px`,
+                animationDuration: `${coconut.duration}s`,
+                animationDelay: `${coconut.delay}s`,
+                width: `${30 * coconut.scale}px`,
+                height: `${35 * coconut.scale}px`,
+              }}
+            >
+              <div className="relative w-full h-full">
+                {/* Coconut */}
+                <svg viewBox="0 0 30 35" style={{ width: '100%', height: '100%' }}>
+                  <ellipse cx="15" cy="17" rx="12" ry="14" fill="#6b4f3c" className="dark:fill-amber-800" />
+                  <ellipse cx="17" cy="15" rx="3" ry="4" fill="#8b6b4f" className="dark:fill-amber-700" opacity="0.6" />
+                  <path d="M10 10 Q 15 5 20 10" stroke="#4a3729" strokeWidth="2" fill="none" className="dark:stroke-amber-950" />
                 </svg>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
-          {/* DARK MODE: SKY LANTERNS */}
-          <div className="hidden dark:block w-full h-full">
-            {lanterns.map((lantern) => (
-              <div
-                key={lantern.id}
-                className={`festival-object ${lantern.color}`}
-                style={{
-                  left: `${lantern.left}%`,
-                   // @ts-ignore
-                   "--sway": `${lantern.sway}px`,
-                  animationDuration: `${lantern.duration}s`,
-                  animationDelay: `${lantern.delay}s`,
-                  width: `${50 * lantern.scale}px`,
-                  height: `${60 * lantern.scale}px`,
-                }}
-              >
-                <div className="relative w-full h-full">
-                  <div className="absolute inset-0 bg-orange-500 blur-[25px] opacity-30 rounded-full scale-125 animate-pulse"></div>
-                  <svg viewBox="0 0 50 60" fill="currentColor" style={{ width: '100%', height: '100%' }}>
-                    <path d="M10 10 Q 5 30 10 50 L 40 50 Q 45 30 40 10 L 10 10 Z" fillOpacity="0.9" />
-                    <ellipse cx="25" cy="10" rx="15" ry="5" fillOpacity="0.5" />
-                    <path d="M20 50 L 20 55 M 30 50 L 30 55" stroke="currentColor" strokeWidth="2" />
-                    <circle cx="25" cy="30" r="8" fill="#FFF" fillOpacity="0.8" className="animate-pulse" style={{filter: 'blur(4px)'}} />
-                  </svg>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* PEOPLE WALKING - Both modes */}
+        <div className="w-full h-full">
+          {people.map((person) => (
+            <div
+              key={`person-${person.id}`}
+              className="beach-people"
+              style={{
+                bottom: `${person.top}%`,
+                // @ts-ignore
+                "--sway": `${person.sway}px`,
+                animationDuration: `${person.duration}s`,
+                animationDelay: `${person.delay}s`,
+                width: `${25 * person.scale}px`,
+                height: `${40 * person.scale}px`,
+              }}
+            >
+              {/* Simple person silhouette */}
+              <svg viewBox="0 0 20 30" style={{ width: '100%', height: '100%' }}>
+                <circle cx="10" cy="8" r="5" fill="#4a4a4a" className="dark:fill-gray-300" opacity="0.7" />
+                <rect x="7" y="13" width="6" height="12" fill="#4a4a4a" className="dark:fill-gray-300" opacity="0.7" />
+                <line x1="5" y1="18" x2="15" y2="18" stroke="#4a4a4a" className="dark:stroke-gray-300" strokeWidth="2" opacity="0.7" />
+                <line x1="7" y1="25" x2="3" y2="30" stroke="#4a4a4a" className="dark:stroke-gray-300" strokeWidth="2" opacity="0.7" />
+                <line x1="13" y1="25" x2="17" y2="30" stroke="#4a4a4a" className="dark:stroke-gray-300" strokeWidth="2" opacity="0.7" />
+              </svg>
+            </div>
+          ))}
+        </div>
+
+        {/* SHOOTING STARS - Dark mode only */}
+        <div className="hidden dark:block w-full h-full">
+          {shootingStars.map((star) => (
+            <div
+              key={`star-${star.id}`}
+              className="shooting-star"
+              style={{
+                left: `${star.left}%`,
+                animationDuration: `${star.duration}s`,
+                animationDelay: `${star.delay}s`,
+                transform: `rotate(${star.rotation}deg)`,
+              }}
+            >
+              <svg width="60" height="10" viewBox="0 0 60 10" style={{ filter: 'drop-shadow(0 0 8px white)' }}>
+                <defs>
+                  <linearGradient id={`starGrad-${star.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="white" stopOpacity="1" />
+                    <stop offset="70%" stopColor="white" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d="M0 5 L40 2 L60 5 L40 8 L0 5" fill={`url(#starGrad-${star.id})`} />
+                <circle cx="45" cy="5" r="3" fill="white" opacity="0.8">
+                  <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1s" repeatCount="indefinite" />
+                </circle>
+              </svg>
+            </div>
+          ))}
+          
+          {/* Extra sparkles for night mode */}
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={`sparkle-${i}`}
+              className="absolute rounded-full bg-white"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 40}%`,
+                width: `${2 + Math.random() * 3}px`,
+                height: `${2 + Math.random() * 3}px`,
+                opacity: 0.3 + Math.random() * 0.5,
+                animation: `pulse ${1 + Math.random() * 3}s infinite`,
+                filter: 'blur(1px)',
+              }}
+            />
+          ))}
+        </div>
       </div>
 
-      {/* Background Glows */}
+      {/* Background Glows - adjusted for beach theme */}
       <div className="absolute inset-0 pointer-events-none dark:block hidden z-[2]">
-        <div className="absolute top-1/4 left-10 w-64 h-64 bg-purple-500/20 blur-[100px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-10 w-64 h-64 bg-cyan-500/20 blur-[100px] rounded-full animate-pulse"></div>
+        <div className="absolute top-1/4 left-10 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-10 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full animate-pulse"></div>
       </div>
 
       {/* Mode Toggle */}
