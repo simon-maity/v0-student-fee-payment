@@ -56,7 +56,7 @@
     "jspdf": "latest",
     "jspdf-autotable": "5.0.7",
     "lucide-react": "^0.454.0",
-    "next": "14.2.35",
+    "next": "15.4.8",
     "next-themes": "latest",
     "nodemailer": "latest",
     "pdfkit": "0.17.2",
