@@ -59,7 +59,7 @@ export default function HomePage() {
     // --- GENERATE BEACH ITEMS ---
     
     // Generate Coconuts (for both modes)
-    const newCoconuts = Array.from({ length: 25 }).map((_, i) => ({
+    const newCoconuts = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       duration: 8 + Math.random() * 12, // 8-20 seconds
@@ -70,28 +70,28 @@ export default function HomePage() {
     }))
     setCoconuts(newCoconuts)
 
-    // Generate People walking on beach (for both modes)
-    const newPeople = Array.from({ length: 15 }).map((_, i) => ({
+    // Generate People walking on beach (for both modes) - FIXED: Now they walk on the ground
+    const newPeople = Array.from({ length: 12 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      top: 60 + Math.random() * 30, // Bottom portion of screen
-      duration: 20 + Math.random() * 25, // 20-45 seconds
-      delay: Math.random() * -20,
-      scale: 0.4 + Math.random() * 0.4,
+      top: 85 + Math.random() * 10, // Near bottom of screen (85-95% from top)
+      duration: 25 + Math.random() * 30, // 25-55 seconds - slower walking
+      delay: Math.random() * -30,
+      scale: 0.5 + Math.random() * 0.4,
       rotation: 0,
-      sway: Math.random() * 100 - 50,
+      sway: Math.random() * 30 - 15, // Less sway for natural walking
     }))
     setPeople(newPeople)
 
-    // Generate Shooting Stars (only for dark mode)
-    const newShootingStars = Array.from({ length: 12 }).map((_, i) => ({
+    // Generate Shooting Stars - FIXED: Now moving from top to bottom diagonally
+    const newShootingStars = Array.from({ length: 15 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      duration: 3 + Math.random() * 4, // 3-7 seconds - fast!
-      delay: Math.random() * -10,
-      scale: 0.5 + Math.random() * 0.8,
-      rotation: -25 + Math.random() * 10, // Diagonal angle
-      sway: Math.random() * 200 - 100,
+      duration: 2.5 + Math.random() * 3.5, // 2.5-6 seconds - faster for shooting stars
+      delay: Math.random() * -20,
+      scale: 0.6 + Math.random() * 0.8,
+      rotation: -35 + Math.random() * 15, // Diagonal angle (between -20 to -50 degrees)
+      sway: Math.random() * 150 - 75,
     }))
     setShootingStars(newShootingStars)
 
@@ -122,7 +122,7 @@ export default function HomePage() {
     <div
       className="relative min-h-screen
       bg-gradient-to-br from-sky-100 via-amber-50 to-sky-200
-      dark:from-[#0a0f1a] dark:via-[#141b2b] dark:to-[#0b1424]
+      dark:from-[#0a0f1a] dark:via-[#0f1a2b] dark:to-[#0b1424]
       text-gray-900 dark:text-white transition-all duration-300 overflow-x-hidden"
     >
       {/* --- INLINE STYLES FOR BEACH ANIMATION --- */}
@@ -145,7 +145,7 @@ export default function HomePage() {
         }
         @keyframes peopleWalk {
           0% { 
-            transform: translateX(-100vw) translateY(0); 
+            transform: translateX(-150vw) translateY(0); 
             opacity: 0; 
           }
           10% { 
@@ -155,13 +155,13 @@ export default function HomePage() {
             opacity: 1; 
           }
           100% { 
-            transform: translateX(100vw) translateY(var(--sway)); 
+            transform: translateX(150vw) translateY(var(--sway)); 
             opacity: 0; 
           }
         }
         @keyframes shootingStar {
           0% { 
-            transform: translateX(-50vw) translateY(-30vh) rotate(-25deg); 
+            transform: translateX(-30vw) translateY(-20vh) rotate(var(--rotation)); 
             opacity: 0; 
           }
           20% { 
@@ -171,9 +171,16 @@ export default function HomePage() {
             opacity: 1; 
           }
           100% { 
-            transform: translateX(50vw) translateY(30vh) rotate(-25deg); 
+            transform: translateX(70vw) translateY(80vh) rotate(var(--rotation)); 
             opacity: 0; 
           }
+        }
+        @keyframes waveMotion {
+          0% { transform: translateX(0) translateY(0); }
+          25% { transform: translateX(-5px) translateY(-2px); }
+          50% { transform: translateX(0) translateY(0); }
+          75% { transform: translateX(5px) translateY(2px); }
+          100% { transform: translateX(0) translateY(0); }
         }
         .beach-coconut {
           position: absolute;
@@ -187,9 +194,9 @@ export default function HomePage() {
         }
         .beach-people {
           position: absolute;
-          bottom: 15%;
+          bottom: 5%;
           animation-name: peopleWalk;
-          animation-timing-function: ease-in-out;
+          animation-timing-function: linear;
           animation-iteration-count: infinite;
           z-index: 0;
           pointer-events: none;
@@ -197,40 +204,108 @@ export default function HomePage() {
         }
         .shooting-star {
           position: absolute;
-          top: 20%;
+          top: 0;
+          left: 0;
           animation-name: shootingStar;
-          animation-timing-function: cubic-bezier(0.1, 0.8, 0.3, 1);
+          animation-timing-function: cubic-bezier(0.1, 0.2, 0.3, 1);
           animation-iteration-count: infinite;
           z-index: 0;
           pointer-events: none;
-          filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+          filter: drop-shadow(0 0 15px rgba(255,255,255,0.9));
           will-change: transform;
+        }
+        .wave {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 60px;
+          background: repeating-linear-gradient(
+            transparent 0px,
+            transparent 25px,
+            rgba(255, 255, 255, 0.3) 25px,
+            rgba(255, 255, 255, 0.3) 30px
+          );
+          animation: waveMotion 4s ease-in-out infinite;
+          pointer-events: none;
         }
       `}} />
 
       {/* --- BEACH BACKGROUND LAYER --- */}
       <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden z-[1]">
-        {/* Ocean horizon line */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-amber-300/30 to-transparent dark:from-blue-900/40 dark:to-transparent"></div>
+        {/* Sky gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-300 via-sky-100 to-amber-200 dark:from-[#0a1424] dark:via-[#0f1a2a] dark:to-[#1a2a3a]"></div>
         
-        {/* Sand dunes effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-amber-200/40 to-transparent dark:from-amber-900/20 dark:to-transparent"></div>
+        {/* Sun/Moon */}
+        <div className="absolute top-20 right-20 w-20 h-20 bg-amber-300 dark:bg-gray-100 rounded-full blur-sm opacity-70 dark:opacity-30"></div>
         
-        {/* Coconut trees - static background elements */}
-        <div className="absolute bottom-0 left-[5%] w-16 h-48 opacity-70 dark:opacity-50 pointer-events-none">
-          <div className="absolute bottom-0 left-1/2 w-2 h-40 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
-          <div className="absolute bottom-36 left-1/2 -translate-x-1/2 w-20 h-20 bg-green-700 dark:bg-green-900 rounded-full blur-sm"></div>
+        {/* Ocean */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-cyan-500/30 to-blue-400/20 dark:from-blue-900/50 dark:to-blue-800/30">
+          {/* Wave effect */}
+          <div className="wave dark:opacity-30"></div>
         </div>
-        <div className="absolute bottom-0 right-[8%] w-20 h-56 opacity-70 dark:opacity-50 pointer-events-none">
-          <div className="absolute bottom-0 left-1/2 w-3 h-48 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
-          <div className="absolute bottom-44 left-1/2 -translate-x-1/2 w-24 h-24 bg-green-700 dark:bg-green-900 rounded-full blur-sm"></div>
-        </div>
-        <div className="absolute bottom-0 left-[15%] w-16 h-40 opacity-60 dark:opacity-40 pointer-events-none">
-          <div className="absolute bottom-0 left-1/2 w-2 h-32 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
-          <div className="absolute bottom-28 left-1/2 -translate-x-1/2 w-16 h-16 bg-green-700 dark:bg-green-900 rounded-full blur-sm"></div>
+        
+        {/* Sand */}
+        <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-amber-300/60 to-amber-200/40 dark:from-amber-900/40 dark:to-amber-800/20"></div>
+        
+        {/* REALISTIC COCONUT TREES */}
+        {/* Left Palm Tree */}
+        <div className="absolute bottom-[12%] left-[5%] w-32 h-64 pointer-events-none">
+          {/* Trunk */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-48 bg-gradient-to-t from-amber-800 to-amber-700 dark:from-amber-900 dark:to-amber-800 rounded-full"></div>
+          {/* Leaves */}
+          <div className="absolute bottom-36 left-1/2 -translate-x-1/2">
+            <div className="relative w-32 h-32">
+              <div className="absolute top-0 left-0 w-16 h-24 bg-green-600 dark:bg-green-900 rounded-full rotate-[-45deg] origin-bottom-right"></div>
+              <div className="absolute top-0 right-0 w-16 h-24 bg-green-600 dark:bg-green-900 rounded-full rotate-[45deg] origin-bottom-left"></div>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-14 h-20 bg-green-700 dark:bg-green-950 rounded-full"></div>
+              {/* Coconuts */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-6 bg-amber-700 dark:bg-amber-800 rounded-full"></div>
+              <div className="absolute bottom-2 left-1/3 w-4 h-5 bg-amber-700 dark:bg-amber-800 rounded-full"></div>
+            </div>
+          </div>
         </div>
 
-        {/* FALLING COCONUTS - Both modes */}
+        {/* Right Palm Tree */}
+        <div className="absolute bottom-[12%] right-[5%] w-32 h-72 pointer-events-none">
+          {/* Trunk */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-56 bg-gradient-to-t from-amber-800 to-amber-700 dark:from-amber-900 dark:to-amber-800 rounded-full"></div>
+          {/* Leaves */}
+          <div className="absolute bottom-44 left-1/2 -translate-x-1/2">
+            <div className="relative w-36 h-36">
+              <div className="absolute top-0 left-0 w-20 h-28 bg-green-600 dark:bg-green-900 rounded-full rotate-[-50deg] origin-bottom-right"></div>
+              <div className="absolute top-0 right-0 w-20 h-28 bg-green-600 dark:bg-green-900 rounded-full rotate-[50deg] origin-bottom-left"></div>
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 w-16 h-24 bg-green-700 dark:bg-green-950 rounded-full"></div>
+              {/* Coconuts */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-7 bg-amber-700 dark:bg-amber-800 rounded-full"></div>
+              <div className="absolute bottom-4 left-1/4 w-5 h-6 bg-amber-700 dark:bg-amber-800 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Small Palm Tree on left */}
+        <div className="absolute bottom-[12%] left-[15%] w-20 h-48 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-36 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
+          <div className="absolute bottom-28 left-1/2 -translate-x-1/2">
+            <div className="relative w-20 h-20">
+              <div className="absolute top-0 left-0 w-10 h-14 bg-green-600 dark:bg-green-900 rounded-full rotate-[-40deg]"></div>
+              <div className="absolute top-0 right-0 w-10 h-14 bg-green-600 dark:bg-green-900 rounded-full rotate-[40deg]"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Small Palm Tree on right */}
+        <div className="absolute bottom-[12%] right-[15%] w-20 h-48 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-36 bg-amber-800 dark:bg-amber-900 rounded-full"></div>
+          <div className="absolute bottom-28 left-1/2 -translate-x-1/2">
+            <div className="relative w-20 h-20">
+              <div className="absolute top-0 left-0 w-10 h-14 bg-green-600 dark:bg-green-900 rounded-full rotate-[-40deg]"></div>
+              <div className="absolute top-0 right-0 w-10 h-14 bg-green-600 dark:bg-green-900 rounded-full rotate-[40deg]"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* FALLING COCONUTS */}
         <div className="w-full h-full">
           {coconuts.map((coconut) => (
             <div
@@ -242,23 +317,23 @@ export default function HomePage() {
                 "--sway": `${coconut.sway}px`,
                 animationDuration: `${coconut.duration}s`,
                 animationDelay: `${coconut.delay}s`,
-                width: `${30 * coconut.scale}px`,
-                height: `${35 * coconut.scale}px`,
+                width: `${28 * coconut.scale}px`,
+                height: `${32 * coconut.scale}px`,
               }}
             >
               <div className="relative w-full h-full">
-                {/* Coconut */}
-                <svg viewBox="0 0 30 35" style={{ width: '100%', height: '100%' }}>
-                  <ellipse cx="15" cy="17" rx="12" ry="14" fill="#6b4f3c" className="dark:fill-amber-800" />
-                  <ellipse cx="17" cy="15" rx="3" ry="4" fill="#8b6b4f" className="dark:fill-amber-700" opacity="0.6" />
-                  <path d="M10 10 Q 15 5 20 10" stroke="#4a3729" strokeWidth="2" fill="none" className="dark:stroke-amber-950" />
+                <svg viewBox="0 0 28 32" style={{ width: '100%', height: '100%' }}>
+                  <ellipse cx="14" cy="16" rx="11" ry="13" fill="#8B5A2B" className="dark:fill-amber-800" />
+                  <ellipse cx="16" cy="14" rx="3" ry="4" fill="#A67B5B" className="dark:fill-amber-700" opacity="0.6" />
+                  <path d="M9 9 Q 14 5 19 9" stroke="#5D3A1A" strokeWidth="2" fill="none" />
+                  <circle cx="10" cy="18" r="2" fill="#5D3A1A" opacity="0.3" />
                 </svg>
               </div>
             </div>
           ))}
         </div>
 
-        {/* PEOPLE WALKING - Both modes */}
+        {/* PEOPLE WALKING ON BEACH - FIXED: Now at the bottom where sand is */}
         <div className="w-full h-full">
           {people.map((person) => (
             <div
@@ -270,23 +345,41 @@ export default function HomePage() {
                 "--sway": `${person.sway}px`,
                 animationDuration: `${person.duration}s`,
                 animationDelay: `${person.delay}s`,
-                width: `${25 * person.scale}px`,
-                height: `${40 * person.scale}px`,
+                width: `${22 * person.scale}px`,
+                height: `${38 * person.scale}px`,
               }}
             >
-              {/* Simple person silhouette */}
-              <svg viewBox="0 0 20 30" style={{ width: '100%', height: '100%' }}>
-                <circle cx="10" cy="8" r="5" fill="#4a4a4a" className="dark:fill-gray-300" opacity="0.7" />
-                <rect x="7" y="13" width="6" height="12" fill="#4a4a4a" className="dark:fill-gray-300" opacity="0.7" />
-                <line x1="5" y1="18" x2="15" y2="18" stroke="#4a4a4a" className="dark:stroke-gray-300" strokeWidth="2" opacity="0.7" />
-                <line x1="7" y1="25" x2="3" y2="30" stroke="#4a4a4a" className="dark:stroke-gray-300" strokeWidth="2" opacity="0.7" />
-                <line x1="13" y1="25" x2="17" y2="30" stroke="#4a4a4a" className="dark:stroke-gray-300" strokeWidth="2" opacity="0.7" />
+              <svg viewBox="0 0 22 38" style={{ width: '100%', height: '100%' }}>
+                {/* Person with beach clothes */}
+                <circle cx="11" cy="8" r="6" fill="#2C3E50" className="dark:fill-gray-300" />
+                {/* Shirt/Torso */}
+                <rect x="7" y="14" width="8" height="14" fill="#34495E" className="dark:fill-gray-400" rx="2" />
+                {/* Shorts/Pants */}
+                <rect x="7" y="26" width="8" height="8" fill="#2C3E50" className="dark:fill-gray-500" rx="1" />
+                {/* Arms - moving */}
+                <line x1="7" y1="18" x2="2" y2="22" stroke="#34495E" className="dark:stroke-gray-400" strokeWidth="2.5">
+                  <animate attributeName="x2" values="2;4;2" dur="2s" repeatCount="indefinite" />
+                </line>
+                <line x1="15" y1="18" x2="20" y2="22" stroke="#34495E" className="dark:stroke-gray-400" strokeWidth="2.5">
+                  <animate attributeName="x2" values="20;18;20" dur="2s" repeatCount="indefinite" />
+                </line>
+                {/* Legs - moving */}
+                <line x1="9" y1="34" x2="5" y2="38" stroke="#2C3E50" className="dark:stroke-gray-500" strokeWidth="2.5">
+                  <animate attributeName="y2" values="38;36;38" dur="1.5s" repeatCount="indefinite" />
+                </line>
+                <line x1="13" y1="34" x2="17" y2="38" stroke="#2C3E50" className="dark:stroke-gray-500" strokeWidth="2.5">
+                  <animate attributeName="y2" values="38;36;38" dur="1.5s" repeatCount="indefinite" />
+                </line>
+                {/* Beach hat for some */}
+                {person.id % 3 === 0 && (
+                  <path d="M5 2 L17 2 L15 6 L7 6 Z" fill="#E67E22" className="dark:fill-amber-600" />
+                )}
               </svg>
             </div>
           ))}
         </div>
 
-        {/* SHOOTING STARS - Dark mode only */}
+        {/* SHOOTING STARS - FIXED: Now moving from top to bottom correctly */}
         <div className="hidden dark:block w-full h-full">
           {shootingStars.map((star) => (
             <div
@@ -294,47 +387,57 @@ export default function HomePage() {
               className="shooting-star"
               style={{
                 left: `${star.left}%`,
+                top: `${Math.random() * 30}%`,
+                // @ts-ignore
+                "--rotation": `${star.rotation}deg`,
                 animationDuration: `${star.duration}s`,
                 animationDelay: `${star.delay}s`,
-                transform: `rotate(${star.rotation}deg)`,
               }}
             >
-              <svg width="60" height="10" viewBox="0 0 60 10" style={{ filter: 'drop-shadow(0 0 8px white)' }}>
+              <svg width="100" height="20" viewBox="0 0 100 20" style={{ filter: 'drop-shadow(0 0 12px white)' }}>
                 <defs>
                   <linearGradient id={`starGrad-${star.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="white" stopOpacity="1" />
-                    <stop offset="70%" stopColor="white" stopOpacity="0.5" />
+                    <stop offset="60%" stopColor="white" stopOpacity="0.6" />
                     <stop offset="100%" stopColor="white" stopOpacity="0" />
                   </linearGradient>
                 </defs>
-                <path d="M0 5 L40 2 L60 5 L40 8 L0 5" fill={`url(#starGrad-${star.id})`} />
-                <circle cx="45" cy="5" r="3" fill="white" opacity="0.8">
-                  <animate attributeName="opacity" values="0.8;0.3;0.8" dur="1s" repeatCount="indefinite" />
+                <path d="M0 10 L50 7 L85 10 L50 13 L0 10" fill={`url(#starGrad-${star.id})`} />
+                <circle cx="80" cy="10" r="6" fill="white" opacity="0.9">
+                  <animate attributeName="opacity" values="0.9;0.3;0.9" dur="0.8s" repeatCount="indefinite" />
                 </circle>
               </svg>
             </div>
           ))}
           
-          {/* Extra sparkles for night mode */}
-          {[...Array(30)].map((_, i) => (
+          {/* Stars in sky for night mode */}
+          {[...Array(50)].map((_, i) => (
             <div
-              key={`sparkle-${i}`}
+              key={`star-sky-${i}`}
               className="absolute rounded-full bg-white"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 40}%`,
-                width: `${2 + Math.random() * 3}px`,
-                height: `${2 + Math.random() * 3}px`,
-                opacity: 0.3 + Math.random() * 0.5,
-                animation: `pulse ${1 + Math.random() * 3}s infinite`,
-                filter: 'blur(1px)',
+                width: `${1 + Math.random() * 3}px`,
+                height: `${1 + Math.random() * 3}px`,
+                opacity: 0.2 + Math.random() * 0.5,
+                animation: `pulse ${2 + Math.random() * 4}s infinite`,
               }}
             />
           ))}
         </div>
+
+        {/* Seashells on beach */}
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={`shell-${i}`}
+            className="absolute bottom-[10%] left-[${10 + i * 10}%] w-4 h-3 bg-amber-200 dark:bg-amber-700 rounded-tl-full rounded-tr-full opacity-40"
+            style={{ left: `${10 + i * 10}%` }}
+          />
+        ))}
       </div>
 
-      {/* Background Glows - adjusted for beach theme */}
+      {/* Background Glows */}
       <div className="absolute inset-0 pointer-events-none dark:block hidden z-[2]">
         <div className="absolute top-1/4 left-10 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full animate-pulse"></div>
         <div className="absolute bottom-1/4 right-10 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full animate-pulse"></div>
@@ -415,16 +518,15 @@ export default function HomePage() {
         <AnimatePresence>
           {showHidden && (
             <motion.div
-              layout // ✨ PERFORMANCE MAGIC: This enables GPU layout projection
+              layout
               initial={{ opacity: 0, height: 0, scale: 0.98 }}
               animate={{ opacity: 1, height: "auto", scale: 1 }}
               exit={{ opacity: 0, height: 0, scale: 0.98 }}
               transition={{
                 duration: 0.4,
-                ease: "circOut", // Faster easing for mobile responsiveness
+                ease: "circOut",
               }}
               className="mt-8 w-full max-w-4xl overflow-hidden"
-              // Force GPU layer for smoother paint
               style={{ willChange: "height, opacity" }}
             >
               <div className="p-6 rounded-3xl bg-gray-100/90 dark:bg-[#11111f]/90 border border-gray-200 dark:border-gray-800 backdrop-blur-sm mx-1">
@@ -452,7 +554,7 @@ export default function HomePage() {
                       hover:border-cyan-500 dark:hover:border-cyan-400
                       rounded-xl flex flex-col items-center justify-center
                       transition-all duration-300 hover:scale-105
-                      active:scale-95" // Added click feedback for mobile
+                      active:scale-95"
                     >
                       <role.icon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition" />
                       <span className="text-xs sm:text-sm mt-2 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
