@@ -5,7 +5,7 @@ export default function Footer() {
         <p className="text-xs text-muted-foreground">
           Curated & Coded<span className="text-red-500">🧶</span>:{" "}
           <a
-            href="https://www.instagram.com/siimonmaity/"
+            href="https://simonmaity.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline font-medium"
