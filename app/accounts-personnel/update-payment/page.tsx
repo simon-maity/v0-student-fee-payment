@@ -425,11 +425,19 @@ export default function UpdatePayment() {
                             ₹{(fee.semester_fee + fee.exam_fee).toLocaleString()}
                           </td>
                           <td className="text-right p-2 text-green-600">
-                            ₹{(fee.semester_paid + fee.exam_paid).toLocaleString()}
-                          </td>
-                          <td className="text-right p-2 text-red-600">
-                            ₹{(fee.semester_pending + fee.exam_pending).toLocaleString()}
-                          </td>
+  ₹{paymentHistory
+    .filter((p) => p.semester === fee.semester)
+    .reduce((sum, p) => sum + p.amount, 0)
+    .toLocaleString()}
+</td>
+<td className="text-right p-2 text-red-600">
+  ₹{(
+    fee.semester_fee + fee.exam_fee - 
+    paymentHistory
+      .filter((p) => p.semester === fee.semester)
+      .reduce((sum, p) => sum + p.amount, 0)
+  ).toLocaleString()}
+</td>
                         </tr>
                       ))}
                     </tbody>
