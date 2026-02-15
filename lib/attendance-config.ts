@@ -30,6 +30,22 @@ export const CAMPUS_LOCATIONS: CampusLocation[] = [
     radius: 100, // meters
     timezone: "Asia/Kolkata",
   },
+  {
+    id: 3,
+    name: "Third Campus",
+    latitude: 23.03885602091884,
+    longitude: 72.54334190855627,
+    radius: 100, // meters
+    timezone: "Asia/Kolkata",
+  },
+  {
+    id: 4,
+    name: "Home",
+    latitude: 23.006211356262977,
+    longitude: 72.58883124876891,
+    radius: 500, // meters
+    timezone: "Asia/Kolkata",
+  },
 ]
 
 // Attendance limits
