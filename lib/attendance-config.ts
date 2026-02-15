@@ -17,8 +17,8 @@ export const CAMPUS_LOCATIONS: CampusLocation[] = [
   {
     id: 1,
     name: "Centre For Professional Courses",
-    latitude: 23.036810,
-    longitude: 72.54004,
+    latitude: 23.03879697655531,
+    longitude: 72.5454418137245,
     radius: 100, // meters
     timezone: "Asia/Kolkata",
   },
