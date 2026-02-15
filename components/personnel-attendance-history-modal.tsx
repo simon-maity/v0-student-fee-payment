@@ -268,22 +268,6 @@ export function PersonnelAttendanceHistoryModal({
                             <Badge className="bg-green-600 hover:bg-green-700 text-xs">Verified</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-500">
-                          {new Date(day.firstMark || 0).toLocaleTimeString("en-IN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}{" "}
-                          -{" "}
-                          {new Date(day.lastMark || 0).toLocaleTimeString("en-IN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    ))}
-
-                    {/* Pagination */}
-                    <div className="flex justify-between items-center mt-4">
                         <p className="text-xs text-gray-600 dark:text-gray-400">
                           {new Date(record.date).toLocaleDateString("en-IN", {
                             weekday: "short",
@@ -296,6 +280,14 @@ export function PersonnelAttendanceHistoryModal({
                             minute: "2-digit",
                           })}
                         </p>
+                      </div>
+                    ))}
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center mt-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Page {historyData.pagination.currentPage} of {historyData.pagination.pages}
+                      </p>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
