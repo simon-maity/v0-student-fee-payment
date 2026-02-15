@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PersonnelAttendanceCard } from "@/components/personnel-attendance-card"
-import { DollarSign, Users, Receipt, TrendingUp, LogOut } from "lucide-react"
+import { DollarSign, Users, Receipt, TrendingUp, LogOut, Package } from "lucide-react"
 
 export default function AccountsPersonnelDashboard() {
   const router = useRouter()
@@ -178,6 +178,19 @@ export default function AccountsPersonnelDashboard() {
               <Button className="w-full bg-transparent" variant="outline">
                 <DollarSign className="h-4 w-4 mr-2" />
                 Manage Fees
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/accounts-personnel/stationery")}>
+            <CardHeader>
+              <CardTitle>Stationery Requests</CardTitle>
+              <CardDescription>Request office supplies and inventory items</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full bg-transparent" variant="outline">
+                <Package className="h-4 w-4 mr-2" />
+                Request Supplies
               </Button>
             </CardContent>
           </Card>
