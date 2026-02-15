@@ -16,7 +16,7 @@ export interface CampusLocation {
 export const CAMPUS_LOCATIONS: CampusLocation[] = [
   {
     id: 1,
-    name: "Main Campus",
+    name: "Centre For Professional Courses",
     latitude: 23.036810,
     longitude: 72.54004,
     radius: 100, // meters
@@ -24,7 +24,7 @@ export const CAMPUS_LOCATIONS: CampusLocation[] = [
   },
   {
     id: 2,
-    name: "Secondary Campus",
+    name: "School of Design",
     latitude: 23.03952248793422,
     longitude: 72.54354638344735,
     radius: 100, // meters
@@ -32,7 +32,7 @@ export const CAMPUS_LOCATIONS: CampusLocation[] = [
   },
   {
     id: 3,
-    name: "Third Campus",
+    name: "Chemistry Dep",
     latitude: 23.03885602091884,
     longitude: 72.54334190855627,
     radius: 100, // meters
