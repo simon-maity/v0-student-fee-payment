@@ -411,6 +411,13 @@ export default function AdminDashboard() {
                 links={[{ label: "Manage Personnel", href: "/admin/personnel" }]}
               />
               <ManagementCard
+                title="Committee Management"
+                desc="Committee Users & Access"
+                icon={Users}
+                color="purple"
+                links={[{ label: "Manage Committee", href: "/admin/committee" }]}
+              />
+              <ManagementCard
                 title="Faculty Management"
                 desc="Professors & Staff"
                 icon={Users}
