@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     if (month) {
       const monthDate = new Date(`${month}-01`)
-      monthStart = month
+      monthStart = `${month}-01`
       const nextMonth = new Date(monthDate)
       nextMonth.setMonth(nextMonth.getMonth() + 1)
       monthEnd = nextMonth.toISOString().split("T")[0]
