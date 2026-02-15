@@ -56,7 +56,7 @@ export default function HomePage() {
     localStorage.removeItem("technicalTeamData")
 
     // --- GENERATE FESTIVAL ITEMS ---
-    const heartColors = ["text-red-500", "text-pink-500", "text-rose-500", "text-red-400", "text-pink-400", "text-rose-400", "text-red-600"];
+    const heartColors = ["text-red-500", "text-pink-500", "text-rose-500", "text-red-400", "text-pink-400", "text-rose-400"];
     
     // Generate Hearts (Light Mode)
     const newHearts = Array.from({ length: 30 }).map((_, i) => ({
@@ -71,16 +71,16 @@ export default function HomePage() {
     }))
     setHearts(newHearts)
 
-    // Generate Glowing Hearts (Dark Mode) - FIXED: Same parameters as light mode
+    // Generate Glowing Hearts (Dark Mode)
     const newGlowingHearts = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      duration: 15 + Math.random() * 20, // Same as light mode
-      delay: Math.random() * -35, // Same as light mode
-      scale: 0.5 + Math.random() * 0.7, // Same as light mode
+      duration: 25 + Math.random() * 25,
+      delay: Math.random() * -50,
+      scale: 0.6 + Math.random() * 0.6,
       color: "text-red-400",
-      rotation: Math.random() * 30 - 15,
-      sway: Math.random() * 100 - 50,
+      rotation: Math.random() * 10 - 5,
+      sway: Math.random() * 60 - 30,
     }))
     setGlowingHearts(newGlowingHearts)
 
@@ -88,8 +88,8 @@ export default function HomePage() {
 
   if (!mounted)
     return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50 dark:bg-[#1a0f0f]">
-        <div className="w-10 h-10 border-4 border-red-400/30 dark:border-red-500/30 border-t-red-800 dark:border-t-red-400 rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-black">
+        <div className="w-10 h-10 border-4 border-gray-400/30 dark:border-white/30 border-t-gray-800 dark:border-t-white rounded-full animate-spin" />
       </div>
     )
 
@@ -110,8 +110,8 @@ export default function HomePage() {
   return (
     <div
       className="relative min-h-screen
-      bg-gradient-to-br from-red-50 via-rose-50 to-pink-50
-      dark:from-[#1a0f0f] dark:via-[#2a1a1a] dark:to-[#1f1212]
+      bg-gradient-to-br from-red-50 via-pink-50 to-rose-50
+      dark:from-[#1a0a0f] dark:via-[#2a1a28] dark:to-[#1f0f1a]
       text-gray-900 dark:text-white transition-all duration-300 overflow-x-hidden"
     >
       {/* --- INLINE STYLES FOR FESTIVAL ANIMATION --- */}
@@ -135,20 +135,12 @@ export default function HomePage() {
         .festival-object {
           position: absolute;
           top: 0;
-          left: 0;
           animation-name: fullScreenFloat;
           animation-timing-function: linear;
           animation-iteration-count: infinite;
           z-index: 0;
           pointer-events: none;
           will-change: transform;
-        }
-        @keyframes glowPulse {
-          0%, 100% { filter: drop-shadow(0 0 5px currentColor) drop-shadow(0 0 10px currentColor); opacity: 0.7; }
-          50% { filter: drop-shadow(0 0 20px currentColor) drop-shadow(0 0 30px currentColor); opacity: 1; }
-        }
-        .glowing-heart {
-          animation: glowPulse 3s ease-in-out infinite;
         }
       `}} />
 
@@ -171,34 +163,34 @@ export default function HomePage() {
                   height: `${60 * heart.scale}px`,
                 }}
               >
-                <svg viewBox="0 0 24 24" fill="currentColor" style={{ filter: 'drop-shadow(2px 4px 8px rgba(220, 38, 38, 0.3))', width: '100%', height: '100%' }}>
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                <svg viewBox="0 0 100 100" fill="currentColor" style={{ filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.15))', width: '100%', height: '100%' }}>
+                  <path d="M50,90 C50,90 10,60 10,35 C10,20 20,10 32,10 C40,10 46,14 50,20 C54,14 60,10 68,10 C80,10 90,20 90,35 C90,60 50,90 50,90 Z" />
                 </svg>
               </div>
             ))}
           </div>
 
-          {/* DARK MODE: GLOWING HEARTS - FIXED: Added festival-object class for movement */}
+          {/* DARK MODE: GLOWING HEARTS */}
           <div className="hidden dark:block w-full h-full">
             {glowingHearts.map((heart) => (
               <div
                 key={heart.id}
-                className={`festival-object glowing-heart ${heart.color}`}
+                className={`festival-object ${heart.color}`}
                 style={{
                   left: `${heart.left}%`,
-                  // @ts-ignore
-                  "--sway": `${heart.sway}px`,
+                   // @ts-ignore
+                   "--sway": `${heart.sway}px`,
                   animationDuration: `${heart.duration}s`,
                   animationDelay: `${heart.delay}s`,
-                  transformOrigin: "center center",
                   width: `${60 * heart.scale}px`,
                   height: `${60 * heart.scale}px`,
                 }}
               >
                 <div className="relative w-full h-full">
-                  <div className="absolute inset-0 bg-red-500 blur-[20px] opacity-40 rounded-full scale-150"></div>
-                  <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '100%', height: '100%' }}>
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  <div className="absolute inset-0 bg-red-500 blur-[25px] opacity-40 rounded-full scale-125 animate-pulse"></div>
+                  <svg viewBox="0 0 100 100" fill="currentColor" style={{ width: '100%', height: '100%' }}>
+                    <path d="M50,90 C50,90 10,60 10,35 C10,20 20,10 32,10 C40,10 46,14 50,20 C54,14 60,10 68,10 C80,10 90,20 90,35 C90,60 50,90 50,90 Z" fillOpacity="0.9" />
+                    <ellipse cx="50" cy="40" rx="15" ry="12" fill="#FFF" fillOpacity="0.6" className="animate-pulse" style={{filter: 'blur(6px)'}} />
                   </svg>
                 </div>
               </div>
@@ -270,12 +262,12 @@ export default function HomePage() {
               className="group relative w-32 h-32 sm:w-40 sm:h-40
                 bg-white/60 dark:bg-white/10
                 backdrop-blur-xl border border-gray-300 dark:border-white/20
-                hover:border-red-500 dark:hover:border-red-400
+                hover:border-purple-500 dark:hover:border-purple-400
                 rounded-2xl flex flex-col items-center justify-center
                 transition-all duration-300 hover:scale-110
-                hover:shadow-[0_0_25px_#ef444460]"
+                hover:shadow-[0_0_25px_#a855f760]"
             >
-              <studentRole.icon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-700 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition" />
+              <studentRole.icon className="w-10 h-10 sm:w-12 sm:h-12 text-gray-700 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition" />
               <span className="text-sm sm:text-lg font-semibold mt-3 text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
                 {studentRole.name}
               </span>
@@ -299,8 +291,8 @@ export default function HomePage() {
               // Force GPU layer for smoother paint
               style={{ willChange: "height, opacity" }}
             >
-              <div className="p-6 rounded-3xl bg-gray-100/90 dark:bg-[#1a0f0f]/90 border border-gray-200 dark:border-red-900/30 backdrop-blur-sm mx-1">
-                <div className="flex justify-between items-center mb-6 border-b border-gray-300 dark:border-red-900/30 pb-2">
+              <div className="p-6 rounded-3xl bg-gray-100/90 dark:bg-[#11111f]/90 border border-gray-200 dark:border-gray-800 backdrop-blur-sm mx-1">
+                <div className="flex justify-between items-center mb-6 border-b border-gray-300 dark:border-gray-700 pb-2">
                   <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
                     Authorized Personnel
                   </span>
@@ -321,12 +313,12 @@ export default function HomePage() {
                       bg-white/50 dark:bg-white/5
                       backdrop-blur-sm 
                       border border-gray-300 dark:border-white/10
-                      hover:border-red-500 dark:hover:border-red-400
+                      hover:border-cyan-500 dark:hover:border-cyan-400
                       rounded-xl flex flex-col items-center justify-center
                       transition-all duration-300 hover:scale-105
                       active:scale-95" // Added click feedback for mobile
                     >
-                      <role.icon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition" />
+                      <role.icon className="w-6 h-6 sm:w-8 sm:h-8 text-gray-600 dark:text-gray-400 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition" />
                       <span className="text-xs sm:text-sm mt-2 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">
                         {role.name}
                       </span>
@@ -347,7 +339,7 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true, amount: 0.3 }}
-        className="relative z-10 py-16 sm:py-20 bg-white/80 dark:bg-[#1a0f0f]/80 backdrop-blur-sm px-4 sm:px-6"
+        className="relative z-10 py-16 sm:py-20 bg-white dark:bg-[#0f0f1a] px-4 sm:px-6"
       >
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-10">
@@ -362,9 +354,9 @@ export default function HomePage() {
               <motion.div
                 key={i}
                 whileHover={{ scale: 1.05 }}
-                className="p-6 sm:p-8 rounded-2xl border border-gray-300 dark:border-red-900/30 bg-white/60 dark:bg-white/5 backdrop-blur-lg shadow-lg hover:shadow-[0_0_20px_#ef444440] transition-all"
+                className="p-6 sm:p-8 rounded-2xl border border-gray-300 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-lg shadow-lg hover:shadow-[0_0_20px_#00ffff40] transition-all"
               >
-                <stat.icon className="w-9 h-9 sm:w-10 sm:h-10 mx-auto text-red-500 mb-3" />
+                <stat.icon className="w-9 h-9 sm:w-10 sm:h-10 mx-auto text-cyan-500 mb-3" />
                 <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stat.number}</h3>
                 <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mt-1">{stat.label}</p>
               </motion.div>
@@ -379,7 +371,7 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true, amount: 0.3 }}
-        className="relative z-10 py-16 sm:py-20 px-4 md:px-20 bg-red-50/50 dark:bg-[#1a0f0f]/50 backdrop-blur-sm"
+        className="relative z-10 py-16 sm:py-20 px-4 md:px-20 bg-gray-50 dark:bg-[#0f0f1a]"
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
           <div className="w-full md:w-1/2 rounded-2xl overflow-hidden shadow-xl hover:scale-[1.02] transition">
@@ -419,7 +411,7 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
         viewport={{ once: true, amount: 0.3 }}
-        className="relative z-10 py-16 sm:py-20 px-4 md:px-20 bg-white/80 dark:bg-[#1f1212]/80 backdrop-blur-sm"
+        className="relative z-10 py-16 sm:py-20 px-4 md:px-20 bg-white dark:bg-[#11111f]"
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
           <div className="w-full md:w-1/3 rounded-2xl overflow-hidden shadow-xl hover:scale-[1.02] transition">
@@ -463,7 +455,7 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
         viewport={{ once: true, amount: 0.3 }}
-        className="relative z-10 py-16 sm:py-20 px-4 md:px-20 bg-red-50/50 dark:bg-[#1a0f0f]/50 backdrop-blur-sm"
+        className="relative z-10 py-16 sm:py-20 px-4 md:px-20 bg-gray-50 dark:bg-[#0f0f1a]"
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
           <div className="w-full md:w-1/3 rounded-2xl overflow-hidden shadow-xl hover:scale-[1.02] transition">
@@ -478,7 +470,7 @@ export default function HomePage() {
 
           <div className="w-full md:w-2/3 text-gray-700 dark:text-gray-300 text-sm sm:text-base">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
-              Developer’s Message
+              Developer's Message
             </h2>
             <p className="leading-relaxed mb-3 italic">
               "Samanvay is not just a project — it's a vision to bring every academic and administrative function under
@@ -502,9 +494,9 @@ export default function HomePage() {
       </motion.section>
 
       {/* ✅ Footer */}
-      <footer className="relative z-10 text-center py-5 sm:py-6 border-t border-gray-300 dark:border-red-900/40">
+      <footer className="relative z-10 text-center py-5 sm:py-6 border-t border-gray-300 dark:border-gray-700/40">
         <Link href="/terms" className="inline-block group transition-all duration-300">
-          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
             © 2025 Avinya Project by Simon Maity All Rights Reserved. | Samanvay ERP | Developed for GUCPC, Gujarat
             University.
           </p>
