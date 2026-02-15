@@ -9,7 +9,6 @@ import IntroOverlay from "@/components/IntroOverlay"
 import MaintenanceOverlay from "@/components/MaintenanceOverlay"
 
 // 1. IMPORT THE FESTIVAL THEME
-import { GlobalFestivalTheme } from "@/components/global-festival-theme"
 
 const inter = Inter({ subsets: ["latin"] })
 
