@@ -9,7 +9,6 @@ import IntroOverlay from "@/components/IntroOverlay"
 import MaintenanceOverlay from "@/components/MaintenanceOverlay"
 
 // 1. IMPORT THE FESTIVAL THEME
-import { GlobalFestivalTheme } from "@/components/global-festival-theme"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -44,8 +43,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* 2. ADD COMPONENT HERE - Z-Index 50 ensures it shows over dashboard cards */}
-          <GlobalFestivalTheme />
 
           {/* Maintenance Overlay (Highest Priority) */}
           <MaintenanceOverlay />
