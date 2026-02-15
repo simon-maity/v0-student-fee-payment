@@ -43,8 +43,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* 2. ADD COMPONENT HERE - Z-Index 50 ensures it shows over dashboard cards */}
-          <GlobalFestivalTheme />
 
           {/* Maintenance Overlay (Highest Priority) */}
           <MaintenanceOverlay />
