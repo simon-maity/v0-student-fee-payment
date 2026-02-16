@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless"
 import type { NextRequest } from "next/server"
+import bcryptjs from "bcryptjs"
 
 const sql = neon(process.env.DATABASE_URL!)
 
@@ -14,32 +15,33 @@ export async function PUT(
       return Response.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
-    const { name, email, username, password } = await request.json()
+    const { full_name, email, username, password, status } = await request.json()
     const committeeId = parseInt(params.id)
 
-    if (!name || !email || !username) {
+    if (!full_name || !email || !username) {
       return Response.json({ success: false, message: "Required fields are missing" }, { status: 400 })
     }
 
-    // Check if username is already taken by another user
+    // Check if username or email is already taken by another user
     const existingUser = await sql`
-      SELECT id FROM committee WHERE username = ${username} AND id != ${committeeId}
+      SELECT id FROM committee_users WHERE (username = ${username} OR email = ${email}) AND id != ${committeeId}
     `
 
     if (existingUser.length > 0) {
-      return Response.json({ success: false, message: "Username already exists" }, { status: 400 })
+      return Response.json({ success: false, message: "Username or email already exists" }, { status: 400 })
     }
 
     if (password) {
+      const hashedPassword = await bcryptjs.hash(password, 10)
       await sql`
-        UPDATE committee
-        SET name = ${name}, email = ${email}, username = ${username}, password = ${password}
+        UPDATE committee_users
+        SET full_name = ${full_name}, email = ${email}, username = ${username}, password_hash = ${hashedPassword}, status = ${status || "active"}, updated_at = NOW()
         WHERE id = ${committeeId}
       `
     } else {
       await sql`
-        UPDATE committee
-        SET name = ${name}, email = ${email}, username = ${username}
+        UPDATE committee_users
+        SET full_name = ${full_name}, email = ${email}, username = ${username}, status = ${status || "active"}, updated_at = NOW()
         WHERE id = ${committeeId}
       `
     }
@@ -68,7 +70,7 @@ export async function DELETE(
     const committeeId = parseInt(params.id)
 
     await sql`
-      DELETE FROM committee WHERE id = ${committeeId}
+      DELETE FROM committee_users WHERE id = ${committeeId}
     `
 
     return Response.json({
