@@ -1,10 +1,11 @@
 import { neon } from "@neondatabase/serverless"
 import type { NextRequest } from "next/server"
+import bcryptjs from "bcryptjs"
 
 const sql = neon(process.env.DATABASE_URL!)
 
-function generateSessionToken(username: string, password: string): string {
-  const credentials = `${username}:${password}`
+function generateSessionToken(id: number, username: string): string {
+  const credentials = `${id}:${username}:${Date.now()}`
   return Buffer.from(credentials, "utf-8").toString("base64")
 }
 
@@ -17,9 +18,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await sql`
-      SELECT id, name, email, username, is_active
-      FROM committee
-      WHERE username = ${username} AND password = ${password}
+      SELECT id, full_name, email, username, password_hash, status
+      FROM committee_users
+      WHERE username = ${username}
     `
 
     if (result.length === 0) {
@@ -28,18 +29,24 @@ export async function POST(request: NextRequest) {
 
     const committee = result[0]
 
-    if (!committee.is_active) {
+    if (committee.status !== "active") {
       return Response.json({ success: false, message: "Account is inactive" }, { status: 401 })
     }
 
-    const sessionToken = generateSessionToken(username, password)
+    // Verify password
+    const isPasswordValid = await bcryptjs.compare(password, committee.password_hash)
+    if (!isPasswordValid) {
+      return Response.json({ success: false, message: "Invalid credentials" }, { status: 401 })
+    }
+
+    const sessionToken = generateSessionToken(committee.id, committee.username)
 
     return Response.json({
       success: true,
       token: sessionToken,
       committee: {
         id: committee.id,
-        name: committee.name,
+        full_name: committee.full_name,
         email: committee.email,
         username: committee.username,
       },

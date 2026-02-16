@@ -1,16 +1,8 @@
 import { neon } from "@neondatabase/serverless"
 import type { NextRequest } from "next/server"
+import bcryptjs from "bcryptjs"
 
 const sql = neon(process.env.DATABASE_URL!)
-
-function decodeAuth(token: string): { role: string } | null {
-  try {
-    const decoded = Buffer.from(token, "base64").toString("utf-8")
-    return { role: "admin" }
-  } catch {
-    return null
-  }
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,8 +13,8 @@ export async function GET(request: NextRequest) {
     }
 
     const committee = await sql`
-      SELECT id, name, email, username, is_active, created_at
-      FROM committee
+      SELECT id, full_name, email, username, status, created_at
+      FROM committee_users
       ORDER BY created_at DESC
     `
 
@@ -30,16 +22,16 @@ export async function GET(request: NextRequest) {
       success: true,
       committee: committee.map((c: any) => ({
         id: c.id,
-        name: c.name,
+        full_name: c.full_name,
         email: c.email,
         username: c.username,
-        is_active: c.is_active,
+        status: c.status,
         created_at: c.created_at,
       })),
     })
   } catch (error) {
     console.error("Error fetching committee:", error)
-    return Response.json({ success: false, message: "Failed to fetch committee" }, { status: 500 })
+    return Response.json({ success: false, message: "Failed to fetch committee users" }, { status: 500 })
   }
 }
 
@@ -51,24 +43,28 @@ export async function POST(request: NextRequest) {
       return Response.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
-    const { name, email, username, password } = await request.json()
+    const { full_name, email, username, password } = await request.json()
 
-    if (!name || !email || !username || !password) {
+    if (!full_name || !email || !username || !password) {
       return Response.json({ success: false, message: "All fields are required" }, { status: 400 })
     }
 
-    // Check if username already exists
+    // Check if username or email already exists
     const existingUser = await sql`
-      SELECT id FROM committee WHERE username = ${username}
+      SELECT id FROM committee_users 
+      WHERE username = ${username} OR email = ${email}
     `
 
     if (existingUser.length > 0) {
-      return Response.json({ success: false, message: "Username already exists" }, { status: 400 })
+      return Response.json({ success: false, message: "Username or email already exists" }, { status: 400 })
     }
 
+    // Hash password
+    const hashedPassword = await bcryptjs.hash(password, 10)
+
     const result = await sql`
-      INSERT INTO committee (name, email, username, password, is_active, created_at)
-      VALUES (${name}, ${email}, ${username}, ${password}, true, NOW())
+      INSERT INTO committee_users (full_name, email, username, password_hash, status, created_at, updated_at)
+      VALUES (${full_name}, ${email}, ${username}, ${hashedPassword}, 'active', NOW(), NOW())
       RETURNING id
     `
 
