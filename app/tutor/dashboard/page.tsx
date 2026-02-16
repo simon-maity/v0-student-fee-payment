@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { TutorAttendanceCardAdvanced } from "@/components/tutor-attendance-card-advanced"
 import { DeviceInfoDisplay } from "@/components/device-info-display"
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog" // Import Dialog components
 import {
   BookOpen,
   LogOut,
@@ -29,6 +30,7 @@ import {
   TicketX as Tickets,
   ClipboardCheck,
   Zap,
+  MapPin, // Added icon for the new button
 } from "lucide-react"
 
 // --- Interfaces ---
@@ -246,28 +248,12 @@ export default function TutorDashboard() {
           />
         </div>
 
-        {/* --- Bento Grid: Profile & Quick Actions --- */}
+        {/* --- Bento Grid: Profile & Quick Actions & Self Attendance --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
-          {/* Advanced Attendance Card - FIXED LAYOUT */}
-          {/* Using min-h-[450px] to strictly reserve space so loading states don't collapse the grid */}
-          <motion.div variants={itemVariants} className="lg:col-span-6 flex flex-col">
-             <div className="w-full h-full min-h-[450px] flex flex-col">
-                <TutorAttendanceCardAdvanced tutorId={tutor.id} />
-             </div>
-          </motion.div>
-
-          {/* Device Info Display - FIXED LAYOUT */}
-          {/* Matching the min-h-[450px] so the row stays even */}
-          <motion.div variants={itemVariants} className="lg:col-span-6 flex flex-col">
-            <div className="w-full h-full min-h-[450px] flex flex-col">
-                <DeviceInfoDisplay tutorId={tutor.id} />
-            </div>
-          </motion.div>
-
-          {/* Main Info Block */}
-          <motion.div variants={itemVariants} className="lg:col-span-8 flex flex-col">
-            <Card className="h-full min-h-[300px] bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
+          {/* Main Info Block (Identity) - Moved to top for stability */}
+          <motion.div variants={itemVariants} className="lg:col-span-8">
+            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl text-foreground dark:text-white">
                   <School className="w-5 h-5 text-violet-500 dark:text-violet-400" />
@@ -316,23 +302,56 @@ export default function TutorDashboard() {
             </Card>
           </motion.div>
 
-          {/* Quick Actions Grid */}
-          <motion.div variants={itemVariants} className="lg:col-span-4 flex flex-col gap-6">
-            <Card className="flex-1 min-h-[300px] bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
+          {/* Device Info Display - Moved next to Identity */}
+          <motion.div variants={itemVariants} className="lg:col-span-4 h-full">
+            <div className="h-full w-full">
+                <DeviceInfoDisplay tutorId={tutor.id} />
+            </div>
+          </motion.div>
+
+          {/* Expanded Quick Actions Grid */}
+          <motion.div variants={itemVariants} className="lg:col-span-8 flex flex-col gap-6">
+            <Card className="flex-1 bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground dark:text-white">
                   <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3">
+              <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <QuickActionBtn href="/tutor/exam-marks" icon={ClipboardCheck} label="Marks Entry" color="blue" />
-                <QuickActionBtn href="/tutor/exam-attendance" icon={Users} label="Attendance" color="green" />
+                <QuickActionBtn href="/tutor/exam-attendance" icon={Users} label="Student Attendance" color="green" />
                 <QuickActionBtn href="/tutor/leaves" icon={FileText} label="Apply Leave" color="violet" />
                 <QuickActionBtn href="/tutor/stationery" icon={Package} label="Stationery" color="orange" />
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* NEW: Self Attendance Modal Button */}
+          <motion.div variants={itemVariants} className="lg:col-span-4 h-full">
+             <Dialog>
+                <DialogTrigger asChild>
+                   <div className="h-full min-h-[160px] cursor-pointer group rounded-xl border border-slate-200 dark:border-white/10 bg-white/70 dark:bg-zinc-950/40 backdrop-blur-xl hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all flex flex-col items-center justify-center p-6 gap-4 hover:border-violet-400 dark:hover:border-violet-500/50 shadow-sm hover:shadow-lg">
+                      <div className="p-4 rounded-full bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-300 group-hover:scale-110 transition-transform">
+                          <MapPin className="w-8 h-8" />
+                      </div>
+                      <div className="text-center">
+                          <h3 className="text-lg font-bold text-foreground dark:text-white">Self Attendance</h3>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400">Click to Mark Entry/Exit</p>
+                      </div>
+                   </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10">
+                   <DialogHeader>
+                      <DialogTitle>Mark Your Attendance</DialogTitle>
+                   </DialogHeader>
+                   <div className="mt-4">
+                       <TutorAttendanceCardAdvanced tutorId={tutor.id} />
+                   </div>
+                </DialogContent>
+             </Dialog>
+          </motion.div>
+
         </div>
 
         {/* --- Subjects Section Header --- */}
@@ -415,15 +434,15 @@ function QuickActionBtn({ href, icon: Icon, label, color }: any) {
   const colorClass = getColorClasses(color)
 
   return (
-    <Link href={href}>
+    <Link href={href} className="flex-1">
       <div
         className={cn(
-          "flex flex-col items-center justify-center p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer h-24 gap-2 bg-white/50 dark:bg-zinc-900/20",
+          "flex flex-col items-center justify-center p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer h-24 gap-2 bg-white/50 dark:bg-zinc-900/20 w-full",
           colorClass,
         )}
       >
         <Icon className="w-6 h-6" />
-        <span className="text-xs font-semibold">{label}</span>
+        <span className="text-xs font-semibold text-center leading-tight">{label}</span>
       </div>
     </Link>
   )
