@@ -250,24 +250,24 @@ export default function TutorDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
           {/* Advanced Attendance Card - FIXED LAYOUT */}
-          {/* Added h-full and min-h-[350px] to prevent 'small big small big' jump effect */}
-          <motion.div variants={itemVariants} className="lg:col-span-6 h-full">
-             <div className="h-full w-full min-h-[350px]">
+          {/* Using min-h-[450px] to strictly reserve space so loading states don't collapse the grid */}
+          <motion.div variants={itemVariants} className="lg:col-span-6 flex flex-col">
+             <div className="w-full h-full min-h-[450px] flex flex-col">
                 <TutorAttendanceCardAdvanced tutorId={tutor.id} />
              </div>
           </motion.div>
 
           {/* Device Info Display - FIXED LAYOUT */}
-          {/* Added h-full and w-full to ensure it matches the neighbor's height */}
-          <motion.div variants={itemVariants} className="lg:col-span-6 h-full">
-            <div className="h-full w-full">
+          {/* Matching the min-h-[450px] so the row stays even */}
+          <motion.div variants={itemVariants} className="lg:col-span-6 flex flex-col">
+            <div className="w-full h-full min-h-[450px] flex flex-col">
                 <DeviceInfoDisplay tutorId={tutor.id} />
             </div>
           </motion.div>
 
           {/* Main Info Block */}
-          <motion.div variants={itemVariants} className="lg:col-span-8">
-            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
+          <motion.div variants={itemVariants} className="lg:col-span-8 flex flex-col">
+            <Card className="h-full min-h-[300px] bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl text-foreground dark:text-white">
                   <School className="w-5 h-5 text-violet-500 dark:text-violet-400" />
@@ -318,7 +318,7 @@ export default function TutorDashboard() {
 
           {/* Quick Actions Grid */}
           <motion.div variants={itemVariants} className="lg:col-span-4 flex flex-col gap-6">
-            <Card className="flex-1 bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
+            <Card className="flex-1 min-h-[300px] bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground dark:text-white">
                   <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
