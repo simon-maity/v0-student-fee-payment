@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { PersonnelAttendanceCard } from "@/components/personnel-attendance-card"
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import {
   FileText,
   LogOut,
@@ -21,7 +22,9 @@ import {
   ChevronRight,
   ClipboardList,
   Coffee,
-  CheckCircle2
+  CheckCircle2,
+  MapPin,
+  Map as MapIcon
 } from "lucide-react"
 
 // --- Animation Variants ---
@@ -145,69 +148,123 @@ export default function PeonDashboard() {
         </div>
 
         {/* --- Bento Grid: Profile & Quick Actions --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
-          {/* Attendance Card */}
-          <motion.div variants={itemVariants} className="lg:col-span-6">
-            <PersonnelAttendanceCard personnelId={userData.id} userType="peon" />
-          </motion.div>
-
-          {/* Main Info Block */}
-          <motion.div variants={itemVariants} className="lg:col-span-6">
-            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
-              <CardHeader>
+          {/* 1. Identity + Map Button (Left Side - Big) */}
+          <motion.div variants={itemVariants} className="lg:col-span-8">
+            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden flex flex-col">
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-xl text-foreground dark:text-white">
                   <User className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                   Staff Identity Card
                 </CardTitle>
                 <CardDescription className="dark:text-gray-400">Personal details and contact information</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                 {/* ID Card Style Block */}
-                 <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-50 to-amber-50/50 dark:from-zinc-900/50 dark:to-amber-900/10 border border-slate-100 dark:border-white/5 flex flex-col md:flex-row items-center gap-6">
-                    <div className="h-20 w-20 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center border border-amber-200 dark:border-amber-500/30">
-                        <User className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+              <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
+                 
+                 {/* Profile + Map Button Row */}
+                 <div className="flex flex-col md:flex-row gap-6">
+                    
+                    {/* Left: Profile Info */}
+                    <div className="flex-1 p-6 rounded-2xl bg-gradient-to-r from-slate-50 to-amber-50/50 dark:from-zinc-900/50 dark:to-amber-900/10 border border-slate-100 dark:border-white/5 flex flex-col justify-center items-start gap-4">
+                       <div className="flex items-center gap-4">
+                          <div className="h-16 w-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center border border-amber-200 dark:border-amber-500/30 shrink-0">
+                             <User className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                             <h3 className="text-xl font-bold text-foreground dark:text-white">{userData.name}</h3>
+                             <p className="text-sm text-muted-foreground dark:text-gray-400">{userData.email}</p>
+                             <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="text-xs font-mono bg-slate-200 dark:bg-zinc-800 px-2 py-0.5 rounded">@{userData.username}</span>
+                                {userData.phone_number && (
+                                   <span className="text-xs font-mono bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded flex items-center gap-1">
+                                       <Phone className="w-3 h-3" /> {userData.phone_number}
+                                   </span>
+                                )}
+                             </div>
+                          </div>
+                       </div>
                     </div>
-                    <div className="flex-1 space-y-1 text-center md:text-left">
-                        <h3 className="text-2xl font-bold text-foreground dark:text-white">{userData.name}</h3>
-                        <p className="text-muted-foreground dark:text-gray-400">{userData.email}</p>
-                        <div className="flex flex-wrap gap-2 justify-center md:justify-start mt-2">
-                           <span className="text-xs font-mono bg-slate-200 dark:bg-zinc-800 px-2 py-1 rounded">@{userData.username}</span>
-                           {userData.phone_number && (
-                               <span className="text-xs font-mono bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-1 rounded flex items-center gap-1">
-                                   <Phone className="w-3 h-3" /> {userData.phone_number}
-                               </span>
-                           )}
-                        </div>
+
+                    {/* Right: Map Style Self Attendance Button */}
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <div className="md:w-56 cursor-pointer group relative overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-900/50 hover:bg-amber-50 dark:hover:bg-amber-900/10 hover:border-amber-300 dark:hover:border-amber-500/50 transition-all duration-300 min-h-[140px]">
+                                {/* Dummy Map Background */}
+                                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none">
+                                    <div className="w-full h-full" style={{ backgroundImage: 'radial-gradient(circle, #f59e0b 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                                    <MapIcon className="absolute -bottom-4 -right-4 w-32 h-32 text-slate-400 transform -rotate-12" />
+                                </div>
+                                
+                                <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 gap-3">
+                                    {/* Character on Map Pin */}
+                                    <div className="relative">
+                                         <MapPin className="w-10 h-10 text-amber-500 drop-shadow-md group-hover:translate-y-[-2px] transition-transform" />
+                                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white dark:bg-zinc-800 rounded-full p-1 shadow-sm border border-slate-100 dark:border-white/10">
+                                            <User className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                                         </div>
+                                         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-black/20 blur-sm rounded-full group-hover:scale-75 transition-transform duration-300"></div>
+                                    </div>
+                                    
+                                    <div className="text-center">
+                                        <h4 className="font-bold text-sm text-foreground dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-colors">Mark Attendance</h4>
+                                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mt-1">Tap to locate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogTrigger>
+
+                        {/* --- MODAL CONTENT --- */}
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10">
+                           <DialogHeader>
+                              <DialogTitle className="text-xl flex items-center gap-2">
+                                 <MapPin className="w-5 h-5 text-amber-500" />
+                                 Attendance Check
+                              </DialogTitle>
+                              <DialogDescription>
+                                 Ensure your device is authorized and you are within campus bounds.
+                              </DialogDescription>
+                           </DialogHeader>
+                           
+                           <div className="space-y-6 mt-2">
+                               {/* Attendance Card loaded inside modal */}
+                               <div className="space-y-2">
+                                   <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Attendance Status</h4>
+                                   {typeof window !== "undefined" && <PersonnelAttendanceCard personnelId={userData?.id || 0} userType="peon" />}
+                               </div>
+                           </div>
+                        </DialogContent>
+                    </Dialog>
+                 </div>
+
+                 {/* Status Badges (Bottom of Card) */}
+                 <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center gap-3">
+                       <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg text-green-600">
+                           <CheckCircle2 className="w-5 h-5" />
+                       </div>
+                       <div>
+                           <p className="text-sm font-semibold">Account Active</p>
+                           <p className="text-xs text-muted-foreground">Status</p>
+                       </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center gap-3">
+                       <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg text-blue-600">
+                           <Briefcase className="w-5 h-5" />
+                       </div>
+                       <div>
+                           <p className="text-sm font-semibold">Housekeeping</p>
+                           <p className="text-xs text-muted-foreground">Department</p>
+                       </div>
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4 pt-2">
-                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center gap-3">
-                      <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg text-green-600">
-                          <CheckCircle2 className="w-5 h-5" />
-                      </div>
-                      <div>
-                          <p className="text-sm font-semibold">Account Active</p>
-                          <p className="text-xs text-muted-foreground">Status</p>
-                      </div>
-                   </div>
-                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg text-blue-600">
-                          <Briefcase className="w-5 h-5" />
-                      </div>
-                      <div>
-                          <p className="text-sm font-semibold">Housekeeping</p>
-                          <p className="text-xs text-muted-foreground">Department</p>
-                      </div>
-                   </div>
-                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Quick Actions Grid */}
-          <motion.div variants={itemVariants} className="lg:col-span-6 flex flex-col gap-6">
+          {/* 2. Quick Actions (Right Side - Moved Here) */}
+          <motion.div variants={itemVariants} className="lg:col-span-4 flex flex-col gap-6">
             <Card className="flex-1 bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground dark:text-white">
@@ -223,8 +280,8 @@ export default function PeonDashboard() {
               </CardContent>
             </Card>
 
-            <Link href="/peon/leaves">
-              <Card className="bg-gradient-to-br from-amber-600 to-orange-700 dark:from-amber-900 dark:to-orange-950 border-slate-200 dark:border-zinc-800 hover:border-amber-400 transition-all group cursor-pointer h-full shadow-lg">
+            <Link href="/peon/leaves" className="block">
+              <Card className="bg-gradient-to-br from-amber-600 to-orange-700 dark:from-amber-900 dark:to-orange-950 border-slate-200 dark:border-zinc-800 hover:border-amber-400 transition-all group cursor-pointer shadow-lg">
                 <CardContent className="p-6 flex items-center justify-between">
                   <div>
                     <p className="text-sm text-amber-100 mb-1">Upcoming Holidays</p>
@@ -267,7 +324,7 @@ export default function PeonDashboard() {
             icon={Clock} 
             color="blue"
             links={[
-              { label: "View Schedule", href: "#" }, // Placeholder for future expansion
+              { label: "View Schedule", href: "#" }, 
               { label: "Attendance Log", href: "#" }
             ]}
           />
@@ -288,7 +345,7 @@ export default function PeonDashboard() {
   )
 }
 
-// --- Sub Components (Consistent with Admin/Tech Dashboards) ---
+// --- Sub Components ---
 
 const getColorClasses = (color: string) => {
     const maps: any = {
