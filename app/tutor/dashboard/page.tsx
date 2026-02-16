@@ -247,15 +247,22 @@ export default function TutorDashboard() {
         </div>
 
         {/* --- Bento Grid: Profile & Quick Actions --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Advanced Attendance Card */}
-          <motion.div variants={itemVariants} className="lg:col-span-6">
-            <TutorAttendanceCardAdvanced tutorId={tutor.id} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          {/* Advanced Attendance Card - FIXED LAYOUT */}
+          {/* Added h-full and min-h-[350px] to prevent 'small big small big' jump effect */}
+          <motion.div variants={itemVariants} className="lg:col-span-6 h-full">
+             <div className="h-full w-full min-h-[350px]">
+                <TutorAttendanceCardAdvanced tutorId={tutor.id} />
+             </div>
           </motion.div>
 
-          {/* Device Info Display */}
-          <motion.div variants={itemVariants} className="lg:col-span-6">
-            <DeviceInfoDisplay tutorId={tutor.id} />
+          {/* Device Info Display - FIXED LAYOUT */}
+          {/* Added h-full and w-full to ensure it matches the neighbor's height */}
+          <motion.div variants={itemVariants} className="lg:col-span-6 h-full">
+            <div className="h-full w-full">
+                <DeviceInfoDisplay tutorId={tutor.id} />
+            </div>
           </motion.div>
 
           {/* Main Info Block */}
