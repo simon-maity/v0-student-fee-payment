@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { TutorAttendanceCardAdvanced } from "@/components/tutor-attendance-card-advanced"
 import { DeviceInfoDisplay } from "@/components/device-info-display"
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog" // Import Dialog components
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import {
   BookOpen,
   LogOut,
@@ -30,7 +30,8 @@ import {
   TicketX as Tickets,
   ClipboardCheck,
   Zap,
-  MapPin, // Added icon for the new button
+  MapPin,
+  Smartphone
 } from "lucide-react"
 
 // --- Interfaces ---
@@ -248,10 +249,10 @@ export default function TutorDashboard() {
           />
         </div>
 
-        {/* --- Bento Grid: Profile & Quick Actions & Self Attendance --- */}
+        {/* --- Main Dashboard Grid --- */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
-          {/* Main Info Block (Identity) - Moved to top for stability */}
+          {/* 1. Academic Identity (Left Side) */}
           <motion.div variants={itemVariants} className="lg:col-span-8">
             <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
               <CardHeader>
@@ -302,54 +303,74 @@ export default function TutorDashboard() {
             </Card>
           </motion.div>
 
-          {/* Device Info Display - Moved next to Identity */}
+          {/* 2. Self Attendance Button (Right Side) - Triggers Modal */}
           <motion.div variants={itemVariants} className="lg:col-span-4 h-full">
-            <div className="h-full w-full">
-                <DeviceInfoDisplay tutorId={tutor.id} />
-            </div>
+             <Dialog>
+                <DialogTrigger asChild>
+                   <div className="h-full min-h-[300px] cursor-pointer group rounded-xl border border-slate-200 dark:border-white/10 bg-white/70 dark:bg-zinc-950/40 backdrop-blur-xl hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all flex flex-col items-center justify-center p-6 gap-6 hover:border-violet-400 dark:hover:border-violet-500/50 shadow-sm hover:shadow-lg">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-violet-400/20 blur-xl rounded-full animate-pulse"></div>
+                        <div className="relative p-6 rounded-full bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-300 group-hover:scale-110 transition-transform duration-300 border border-violet-200 dark:border-violet-500/30">
+                            <MapPin className="w-10 h-10" />
+                        </div>
+                      </div>
+                      <div className="text-center space-y-2">
+                          <h3 className="text-2xl font-bold text-foreground dark:text-white">Self Attendance</h3>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400 px-4">
+                             Click to check location validity and mark your daily entry/exit.
+                          </p>
+                          <Badge variant="outline" className="mt-2 bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+                             <Smartphone className="w-3 h-3 mr-1" /> Check Device
+                          </Badge>
+                      </div>
+                   </div>
+                </DialogTrigger>
+
+                {/* --- MODAL CONTENT --- */}
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10">
+                   <DialogHeader>
+                      <DialogTitle className="text-xl flex items-center gap-2">
+                         <MapPin className="w-5 h-5 text-violet-500" />
+                         Attendance & Device Check
+                      </DialogTitle>
+                      <DialogDescription>
+                         Ensure your device is authorized and you are within campus bounds.
+                      </DialogDescription>
+                   </DialogHeader>
+                   
+                   <div className="space-y-6 mt-2">
+                       {/* Section 1: Attendance Controls */}
+                       <div className="space-y-2">
+                           <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Attendance Status</h4>
+                           <TutorAttendanceCardAdvanced tutorId={tutor.id} />
+                       </div>
+
+                       {/* Section 2: Device Info (Moved Inside Modal) */}
+                       <div className="space-y-2">
+                           <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Device Health</h4>
+                           <DeviceInfoDisplay tutorId={tutor.id} />
+                       </div>
+                   </div>
+                </DialogContent>
+             </Dialog>
           </motion.div>
 
-          {/* Expanded Quick Actions Grid */}
-          <motion.div variants={itemVariants} className="lg:col-span-8 flex flex-col gap-6">
-            <Card className="flex-1 bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
-              <CardHeader className="pb-3">
+          {/* 3. Quick Actions (Full Width Bottom Row) */}
+          <motion.div variants={itemVariants} className="lg:col-span-12">
+            <Card className="bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
+              <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-foreground dark:text-white">
                   <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <QuickActionBtn href="/tutor/exam-marks" icon={ClipboardCheck} label="Marks Entry" color="blue" />
                 <QuickActionBtn href="/tutor/exam-attendance" icon={Users} label="Student Attendance" color="green" />
                 <QuickActionBtn href="/tutor/leaves" icon={FileText} label="Apply Leave" color="violet" />
                 <QuickActionBtn href="/tutor/stationery" icon={Package} label="Stationery" color="orange" />
               </CardContent>
             </Card>
-          </motion.div>
-
-          {/* NEW: Self Attendance Modal Button */}
-          <motion.div variants={itemVariants} className="lg:col-span-4 h-full">
-             <Dialog>
-                <DialogTrigger asChild>
-                   <div className="h-full min-h-[160px] cursor-pointer group rounded-xl border border-slate-200 dark:border-white/10 bg-white/70 dark:bg-zinc-950/40 backdrop-blur-xl hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all flex flex-col items-center justify-center p-6 gap-4 hover:border-violet-400 dark:hover:border-violet-500/50 shadow-sm hover:shadow-lg">
-                      <div className="p-4 rounded-full bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-300 group-hover:scale-110 transition-transform">
-                          <MapPin className="w-8 h-8" />
-                      </div>
-                      <div className="text-center">
-                          <h3 className="text-lg font-bold text-foreground dark:text-white">Self Attendance</h3>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">Click to Mark Entry/Exit</p>
-                      </div>
-                   </div>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10">
-                   <DialogHeader>
-                      <DialogTitle>Mark Your Attendance</DialogTitle>
-                   </DialogHeader>
-                   <div className="mt-4">
-                       <TutorAttendanceCardAdvanced tutorId={tutor.id} />
-                   </div>
-                </DialogContent>
-             </Dialog>
           </motion.div>
 
         </div>
