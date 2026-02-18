@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { TutorAttendanceCardAdvanced } from "@/components/tutor-attendance-card-advanced"
 import { DeviceInfoDisplay } from "@/components/device-info-display"
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import {
   BookOpen,
   LogOut,
@@ -29,6 +30,11 @@ import {
   TicketX as Tickets,
   ClipboardCheck,
   Zap,
+  MapPin,
+  Smartphone,
+  Map as MapIcon,
+  User,
+  Navigation
 } from "lucide-react"
 
 // --- Interfaces ---
@@ -246,46 +252,99 @@ export default function TutorDashboard() {
           />
         </div>
 
-        {/* --- Bento Grid: Profile & Quick Actions --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Advanced Attendance Card */}
-          <motion.div variants={itemVariants} className="lg:col-span-6">
-            <TutorAttendanceCardAdvanced tutorId={tutor.id} />
-          </motion.div>
-
-          {/* Device Info Display */}
-          <motion.div variants={itemVariants} className="lg:col-span-6">
-            <DeviceInfoDisplay tutorId={tutor.id} />
-          </motion.div>
-
-          {/* Main Info Block */}
+        {/* --- Main Dashboard Grid --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          {/* 1. Academic Identity + Self Attendance Map Button (Left Side - Bigger) */}
           <motion.div variants={itemVariants} className="lg:col-span-8">
-            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden">
-              <CardHeader>
+            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl overflow-hidden flex flex-col">
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-xl text-foreground dark:text-white">
                   <School className="w-5 h-5 text-violet-500 dark:text-violet-400" />
                   Academic Staff Identity
                 </CardTitle>
                 <CardDescription className="dark:text-gray-400">Department and Role Information</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* ID Card Style Block */}
-                <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-50 to-violet-50/50 dark:from-zinc-900/50 dark:to-violet-900/10 border border-slate-100 dark:border-white/5 flex flex-col md:flex-row items-center gap-6">
-                  <div className="h-20 w-20 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center border border-violet-200 dark:border-violet-500/30">
-                    <GraduationCap className="w-10 h-10 text-violet-600 dark:text-violet-400" />
-                  </div>
-                  <div className="flex-1 space-y-1 text-center md:text-left">
-                    <h3 className="text-2xl font-bold text-foreground dark:text-white">{tutor.name}</h3>
-                    <p className="text-muted-foreground dark:text-gray-400 font-medium">{tutor.department}</p>
-                    <div className="flex flex-wrap gap-2 justify-center md:justify-start mt-2">
-                      <span className="text-xs font-mono bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 px-2 py-1 rounded">
-                        Faculty Member
-                      </span>
+              <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
+                
+                {/* Profile + Map Button Row */}
+                <div className="flex flex-col md:flex-row gap-6">
+                    
+                    {/* Left: Profile Info */}
+                    <div className="flex-1 p-6 rounded-2xl bg-gradient-to-r from-slate-50 to-violet-50/50 dark:from-zinc-900/50 dark:to-violet-900/10 border border-slate-100 dark:border-white/5 flex flex-col justify-center items-start gap-4">
+                        <div className="flex items-center gap-4">
+                             <div className="h-16 w-16 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center border border-violet-200 dark:border-violet-500/30 shrink-0">
+                                <GraduationCap className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-foreground dark:text-white">{tutor.name}</h3>
+                                <p className="text-sm text-muted-foreground dark:text-gray-400 font-medium">{tutor.department}</p>
+                            </div>
+                        </div>
+                        <Badge className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 border-none">
+                           Faculty Member
+                        </Badge>
                     </div>
-                  </div>
+
+                    {/* Right: Map Style Self Attendance Button */}
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <div className="md:w-56 cursor-pointer group relative overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-900/50 hover:bg-violet-50 dark:hover:bg-violet-900/10 hover:border-violet-300 dark:hover:border-violet-500/50 transition-all duration-300">
+                                {/* Dummy Map Background */}
+                                <div className="absolute inset-0 opacity-10 dark:opacity-[0.03] pointer-events-none">
+                                    <div className="w-full h-full" style={{ backgroundImage: 'radial-gradient(circle, #8b5cf6 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+                                    <MapIcon className="absolute -bottom-4 -right-4 w-32 h-32 text-slate-400 transform -rotate-12" />
+                                </div>
+                                
+                                <div className="relative z-10 h-full flex flex-col items-center justify-center p-4 gap-3">
+                                    {/* Character on Map Pin */}
+                                    <div className="relative">
+                                         <MapPin className="w-10 h-10 text-violet-500 drop-shadow-md group-hover:translate-y-[-2px] transition-transform" />
+                                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white dark:bg-zinc-800 rounded-full p-1 shadow-sm border border-slate-100 dark:border-white/10">
+                                            <User className="w-4 h-4 text-violet-700 dark:text-violet-400" />
+                                         </div>
+                                         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-2 bg-black/20 blur-sm rounded-full group-hover:scale-75 transition-transform duration-300"></div>
+                                    </div>
+                                    
+                                    <div className="text-center">
+                                        <h4 className="font-bold text-sm text-foreground dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors">Mark Attendance</h4>
+                                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mt-1">Tap to locate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogTrigger>
+
+                        {/* --- MODAL CONTENT --- */}
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border-slate-200 dark:border-white/10">
+                           <DialogHeader>
+                              <DialogTitle className="text-xl flex items-center gap-2">
+                                 <MapPin className="w-5 h-5 text-violet-500" />
+                                 Attendance & Device Check
+                              </DialogTitle>
+                              <DialogDescription>
+                                 Ensure your device is authorized and you are within campus bounds.
+                              </DialogDescription>
+                           </DialogHeader>
+                           
+                           <div className="space-y-6 mt-2">
+                               {/* Section 1: Attendance Controls */}
+                               <div className="space-y-2">
+                                   <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Attendance Status</h4>
+                                   <TutorAttendanceCardAdvanced tutorId={tutor.id} />
+                               </div>
+
+                               {/* Section 2: Device Info */}
+                               <div className="space-y-2">
+                                   <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Device Health</h4>
+                                   <DeviceInfoDisplay tutorId={tutor.id} />
+                               </div>
+                           </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2">
+                {/* Bottom: Status Stats */}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center gap-3">
                     <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg text-green-600">
                       <CheckCircle2 className="w-5 h-5" />
@@ -305,27 +364,31 @@ export default function TutorDashboard() {
                     </div>
                   </div>
                 </div>
+
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Quick Actions Grid */}
-          <motion.div variants={itemVariants} className="lg:col-span-4 flex flex-col gap-6">
-            <Card className="flex-1 bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
+          {/* 2. Quick Actions (Right Side - Now here instead of self attendance) */}
+          <motion.div variants={itemVariants} className="lg:col-span-4 flex flex-col">
+            <Card className="h-full bg-white/70 dark:bg-zinc-950/40 border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-sm dark:shadow-2xl">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground dark:text-white">
                   <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3">
-                <QuickActionBtn href="/tutor/exam-marks" icon={ClipboardCheck} label="Marks Entry" color="blue" />
-                <QuickActionBtn href="/tutor/exam-attendance" icon={Users} label="Attendance" color="green" />
-                <QuickActionBtn href="/tutor/leaves" icon={FileText} label="Apply Leave" color="violet" />
-                <QuickActionBtn href="/tutor/stationery" icon={Package} label="Stationery" color="orange" />
+              <CardContent className="h-full">
+                  <div className="grid grid-cols-2 gap-3 h-full pb-2">
+                    <QuickActionBtn href="/tutor/exam-marks" icon={ClipboardCheck} label="Marks Entry" color="blue" />
+                    <QuickActionBtn href="/tutor/exam-attendance" icon={Users} label="Student Attendance" color="green" />
+                    <QuickActionBtn href="/tutor/leaves" icon={FileText} label="Apply Leave" color="violet" />
+                    <QuickActionBtn href="/tutor/stationery" icon={Package} label="Stationery" color="orange" />
+                  </div>
               </CardContent>
             </Card>
           </motion.div>
+
         </div>
 
         {/* --- Subjects Section Header --- */}
@@ -408,15 +471,15 @@ function QuickActionBtn({ href, icon: Icon, label, color }: any) {
   const colorClass = getColorClasses(color)
 
   return (
-    <Link href={href}>
+    <Link href={href} className="flex-1 h-full">
       <div
         className={cn(
-          "flex flex-col items-center justify-center p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer h-24 gap-2 bg-white/50 dark:bg-zinc-900/20",
+          "flex flex-col items-center justify-center p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer h-full min-h-[90px] gap-2 bg-white/50 dark:bg-zinc-900/20 w-full",
           colorClass,
         )}
       >
         <Icon className="w-6 h-6" />
-        <span className="text-xs font-semibold">{label}</span>
+        <span className="text-xs font-semibold text-center leading-tight">{label}</span>
       </div>
     </Link>
   )

@@ -56,6 +56,7 @@ export default function StudentFeesPage() {
   const searchParams = useSearchParams()
   const [student, setStudent] = useState<Student | null>(null)
   const [summary, setSummary] = useState<Summary | null>(null)
+  // We keep the full data in state here, so no data is lost
   const [semesterBreakdown, setSemesterBreakdown] = useState<SemesterBreakdown[]>([])
   const [loading, setLoading] = useState(true)
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null)
@@ -63,11 +64,9 @@ export default function StudentFeesPage() {
   useEffect(() => {
     fetchFeeDetails()
     
-    // Check for payment callback
     const status = searchParams.get('payment_status')
     if (status) {
       setPaymentStatus(status)
-      // Clear URL params after showing message
       setTimeout(() => {
         router.replace('/student/fees')
       }, 5000)
@@ -76,30 +75,16 @@ export default function StudentFeesPage() {
 
   const fetchFeeDetails = async () => {
     try {
-      // Check localStorage for token
       let token = localStorage.getItem("studentToken")
-      console.log("[v0] Retrieved token from localStorage:", { hasToken: !!token, length: token?.length })
       
       if (!token) {
-        console.warn("[v0] Student token not found in localStorage, trying to retrieve from StudentAuthManager")
-        // Try to get auth from StudentAuthManager
         const authData = localStorage.getItem("studentCredentials")
-        console.log("[v0] Credentials data available:", !!authData)
         if (authData) {
           try {
             const creds = JSON.parse(authData)
-            console.log("[v0] Parsed credentials:", {
-              enrollment: creds.enrollment,
-              passwordLength: creds.password?.length,
-            })
-            // Recreate token from credentials using standard btoa for consistency
             const tokenData = `${creds.enrollment}:${creds.password}`
             token = btoa(tokenData)
             localStorage.setItem("studentToken", token)
-            console.log("[v0] Token recreated from credentials:", {
-              newTokenLength: token.length,
-              tokenPreview: token.substring(0, 20),
-            })
           } catch (e) {
             console.error("[v0] Failed to recreate token:", e)
           }
@@ -107,12 +92,10 @@ export default function StudentFeesPage() {
       }
       
       if (!token) {
-        console.error("[v0] No student token available - user may not be authenticated")
         setLoading(false)
         return
       }
 
-      console.log("[v0] Sending token to API, token length:", token.length, "preview:", token.substring(0, 20))
       const response = await fetch("/api/student/fees", {
         method: "GET",
         headers: {
@@ -121,12 +104,7 @@ export default function StudentFeesPage() {
         },
       })
       
-      console.log("[v0] Student fees API response status:", response.status)
-
       if (!response.ok) {
-        console.error(`[v0] API returned status ${response.status}`)
-        const errorData = await response.json()
-        console.error("[v0] API error details:", errorData)
         setLoading(false)
         return
       }
@@ -136,8 +114,6 @@ export default function StudentFeesPage() {
         setStudent(data.student)
         setSummary(data.summary)
         setSemesterBreakdown(data.semesterBreakdown)
-      } else {
-        console.error("[v0] API returned error:", data.message || data.error)
       }
     } catch (error) {
       console.error("[v0] Error fetching fee details:", error)
@@ -171,6 +147,15 @@ export default function StudentFeesPage() {
       </div>
     )
   }
+
+  // --- LOGIC CHANGE START ---
+  // This calculates the list of semesters to SHOW, without deleting the actual data.
+  // It effectively hides older semesters from the UI loop only.
+  const visibleSemesters = semesterBreakdown.filter((sem) => {
+    // Shows current semester AND previous 3 semesters (Range of 4 total)
+    return sem.semester >= student.currentSemester - 3 && sem.semester <= student.currentSemester
+  })
+  // --- LOGIC CHANGE END ---
 
   const paymentPercentage = (summary.totalPaid / summary.totalFees) * 100
 
@@ -245,6 +230,7 @@ export default function StudentFeesPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Fees</p>
+                {/* Keeps showing GLOBAL total, not just visible rows */}
                 <p className="text-2xl font-bold">₹{summary.totalFees.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Up to Semester {student.currentSemester}
@@ -296,7 +282,7 @@ export default function StudentFeesPage() {
         <CardHeader>
           <CardTitle>Semester-wise Fee Breakdown</CardTitle>
           <CardDescription>
-            Detailed view of fees for each semester (up to current semester only)
+            Showing recent semesters only
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -315,7 +301,8 @@ export default function StudentFeesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {semesterBreakdown.map((semester) => (
+                {/* Changed from 'semesterBreakdown' to 'visibleSemesters' */}
+                {visibleSemesters.map((semester) => (
                   <TableRow key={semester.semester}>
                     <TableCell className="font-medium">Semester {semester.semester}</TableCell>
                     <TableCell className="text-right">
@@ -349,8 +336,8 @@ export default function StudentFeesPage() {
                           semester.status === "Paid"
                             ? "default"
                             : semester.status === "Partial"
-                              ? "secondary"
-                              : "outline"
+                            ? "secondary"
+                            : "outline"
                         }
                       >
                         {semester.status === "Paid" && <CheckCircle2 className="h-3 w-3 mr-1" />}
@@ -380,15 +367,16 @@ export default function StudentFeesPage() {
         </CardContent>
       </Card>
 
-      {semesterBreakdown.some((s) => s.payments.length > 0) && (
+      {/* Changed from 'semesterBreakdown' to 'visibleSemesters' */}
+      {visibleSemesters.some((s) => s.payments.length > 0) && (
         <Card>
           <CardHeader>
             <CardTitle>Payment History</CardTitle>
-            <CardDescription>All your fee payment transactions</CardDescription>
+            <CardDescription>Transactions for visible semesters</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {semesterBreakdown.map((semester) =>
+              {visibleSemesters.map((semester) =>
                 semester.payments.length > 0 ? (
                   <div key={semester.semester} className="space-y-2">
                     <h3 className="font-semibold text-sm">Semester {semester.semester}</h3>
@@ -437,9 +425,8 @@ export default function StudentFeesPage() {
             <div>
               <h3 className="font-semibold mb-2">Important Note</h3>
               <p className="text-sm text-muted-foreground">
-                Fee information shown is only for your current semester and previous semesters. Future
-                semester fees will be visible once you progress to those semesters. For any payment
-                inquiries, please contact the Accounts Office.
+                Fee information shown is for your current semester and previous 3 semesters only. 
+                For any payment inquiries regarding older semesters, please contact the Accounts Office.
               </p>
             </div>
           </div>
