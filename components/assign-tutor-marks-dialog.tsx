@@ -69,26 +69,49 @@ export function AssignTutorMarksDialog({ open, onOpenChange, exam, onSuccess }: 
 
   useEffect(() => {
     if (open) {
-      loadTutors()
       loadAssignments()
       setSelectedTutor("")
       setSelectedSubject("")
+      setTutors([])
     }
   }, [open])
 
-  const loadTutors = async () => {
+  const loadTutorsForSubject = async (subjectId: string) => {
+    if (!subjectId) {
+      setTutors([])
+      return
+    }
+
     setLoading(true)
     try {
-      const response = await fetch("/api/admin/tutors")
+      const response = await fetch("/api/admin/exams/tutors-by-subject", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject_id: Number(subjectId),
+          exam_id: exam.id,
+        }),
+      })
+
       if (response.ok) {
         const data = await response.json()
-        setTutors(Array.isArray(data.tutors) ? data.tutors : Array.isArray(data) ? data : [])
+        setTutors(Array.isArray(data.tutors) ? data.tutors : [])
+      } else {
+        setTutors([])
+        toast({
+          title: "Warning",
+          description: "No tutors found for this subject",
+          variant: "default",
+        })
       }
     } catch (error) {
       console.error("Error loading tutors:", error)
+      setTutors([])
       toast({
         title: "Error",
-        description: "Failed to load tutors",
+        description: "Failed to load tutors for this subject",
         variant: "destructive",
       })
     } finally {
@@ -287,7 +310,11 @@ export function AssignTutorMarksDialog({ open, onOpenChange, exam, onSuccess }: 
           <div className="space-y-4 flex-1 overflow-y-auto">
             <div className="space-y-2">
               <Label htmlFor="subject-select">Subject</Label>
-              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+              <Select value={selectedSubject} onValueChange={(value) => {
+                setSelectedSubject(value)
+                setSelectedTutor("")
+                loadTutorsForSubject(value)
+              }}>
                 <SelectTrigger id="subject-select">
                   <SelectValue placeholder="Select subject" />
                 </SelectTrigger>
