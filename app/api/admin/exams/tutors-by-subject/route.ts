@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       return Response.json({ success: false, message: "Subject ID is required" }, { status: 400 })
     }
 
-    // Get all tutors who teach this subject
-    const tutors = await sql`
+    // Try to get tutors from tutor_subjects first (those assigned to this subject)
+    let tutors = await sql`
       SELECT DISTINCT
         t.id,
         t.name,
@@ -31,7 +31,21 @@ export async function POST(request: Request) {
       ORDER BY t.name
     `
 
-    console.log("[v0] Found tutors for subject", subject_id, ":", tutors)
+    console.log("[v0] Found tutors from tutor_subjects:", tutors)
+
+    // If no tutors found in tutor_subjects, return all tutors as fallback
+    if (!tutors || tutors.length === 0) {
+      console.log("[v0] No tutors in tutor_subjects, falling back to all tutors")
+      tutors = await sql`
+        SELECT 
+          t.id,
+          t.name,
+          t.department
+        FROM tutors t
+        ORDER BY t.name
+      `
+      console.log("[v0] All available tutors:", tutors)
+    }
 
     return Response.json({
       success: true,
