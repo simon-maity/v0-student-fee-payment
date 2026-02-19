@@ -95,19 +95,33 @@ export function AssignTutorMarksDialog({ open, onOpenChange, exam, onSuccess }: 
         }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setTutors(Array.isArray(data.tutors) ? data.tutors : [])
+      console.log("[v0] tutors-by-subject response status:", response.status)
+
+      const data = await response.json()
+      console.log("[v0] tutors-by-subject response data:", data)
+
+      if (response.ok && data.success) {
+        const tutorList = Array.isArray(data.tutors) ? data.tutors : []
+        console.log("[v0] Setting tutors list:", tutorList)
+        setTutors(tutorList)
+        
+        if (tutorList.length === 0) {
+          toast({
+            title: "Warning",
+            description: "No tutors found for this subject. Please assign tutors to the subject first.",
+            variant: "default",
+          })
+        }
       } else {
         setTutors([])
         toast({
-          title: "Warning",
-          description: "No tutors found for this subject",
-          variant: "default",
+          title: "Error",
+          description: data.message || "Failed to load tutors for this subject",
+          variant: "destructive",
         })
       }
     } catch (error) {
-      console.error("Error loading tutors:", error)
+      console.error("[v0] Error loading tutors:", error)
       setTutors([])
       toast({
         title: "Error",
@@ -336,18 +350,35 @@ export function AssignTutorMarksDialog({ open, onOpenChange, exam, onSuccess }: 
 
             <div className="space-y-2">
               <Label htmlFor="tutor-select">Tutor</Label>
-              <Select value={selectedTutor} onValueChange={setSelectedTutor} disabled={loading}>
+              <Select value={selectedTutor} onValueChange={setSelectedTutor} disabled={loading || tutors.length === 0}>
                 <SelectTrigger id="tutor-select">
-                  <SelectValue placeholder={loading ? "Loading tutors..." : "Select tutor"} />
+                  <SelectValue placeholder={
+                    loading 
+                      ? "Loading tutors..." 
+                      : tutors.length === 0 
+                        ? "No tutors available for this subject" 
+                        : "Select tutor"
+                  } />
                 </SelectTrigger>
                 <SelectContent>
-                  {tutors.map((tutor) => (
-                    <SelectItem key={tutor.id} value={tutor.id.toString()}>
-                      {tutor.name} ({tutor.department})
-                    </SelectItem>
-                  ))}
+                  {tutors.length === 0 && !loading ? (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      No tutors teaching this subject
+                    </div>
+                  ) : (
+                    tutors.map((tutor) => (
+                      <SelectItem key={tutor.id} value={tutor.id.toString()}>
+                        {tutor.name} ({tutor.department})
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
+              {tutors.length === 0 && !loading && selectedSubject && (
+                <p className="text-xs text-orange-600 dark:text-orange-400">
+                  ⚠️ Please ensure tutors are assigned to this subject in the system first
+                </p>
+              )}
             </div>
 
             <div className="flex gap-2 pt-4">

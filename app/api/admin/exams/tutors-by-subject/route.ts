@@ -13,6 +13,8 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { subject_id, exam_id } = body
 
+    console.log("[v0] tutors-by-subject API called with:", { subject_id, exam_id })
+
     if (!subject_id) {
       return Response.json({ success: false, message: "Subject ID is required" }, { status: 400 })
     }
@@ -29,14 +31,16 @@ export async function POST(request: Request) {
       ORDER BY t.name
     `
 
+    console.log("[v0] Found tutors for subject", subject_id, ":", tutors)
+
     return Response.json({
       success: true,
-      tutors: tutors || [],
+      tutors: Array.isArray(tutors) ? tutors : [],
     })
   } catch (error) {
-    console.error("[MYT] Error fetching tutors by subject:", error)
+    console.error("[v0] Error fetching tutors by subject:", error)
     return Response.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "Internal server error", error: String(error) },
       { status: 500 }
     )
   }
