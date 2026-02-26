@@ -30,7 +30,8 @@ import {
   IndianRupee,
   MapPin,
   Map as MapIcon,
-  User
+  User,
+  GraduationCap
 } from "lucide-react"
 
 // --- Animation Variants ---
@@ -339,6 +340,17 @@ export default function AdminPersonnelDashboard() {
             ]}
           />
           
+          <ManagementCard 
+            title="Students Management"
+            desc="View and Manage Students" 
+            icon={GraduationCap} 
+            color="blue"
+            links={[
+              { label: "View All", href: "/admin-personnel/students" },
+              { label: "Student Fees", href: "/admin-personnel/fees" }
+            ]}
+          />
+
           <ManagementCard 
             title="Tickets"
             desc="Raise Issue Tickets" 
