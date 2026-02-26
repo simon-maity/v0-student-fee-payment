@@ -88,8 +88,8 @@ export default function StudentDashboard() {
 
   // ✅ Check profile completion
   useEffect(() => {
-    if (student && !student.profile_completed) {
-      setShowProfileCompletionModal(true)
+    if (student) {
+      setShowProfileCompletionModal(!student.profile_completed)
     }
   }, [student])
 
@@ -206,14 +206,29 @@ export default function StudentDashboard() {
 
       if (data.success) {
 
-        setShowProfileCompletionModal(false)
-
-        setStudent({
+        const updatedStudent = {
           ...student!,
           caste,
           gender,
           profile_completed: true
-        })
+        }
+
+        // ✅ update state
+        setStudent(updatedStudent)
+
+        // ✅ VERY IMPORTANT — update auth storage
+        const authData = StudentAuthManager.getAuth()
+
+        if (authData) {
+          StudentAuthManager.setAuth(
+            updatedStudent,
+            authData.student.enrollment_number,
+            ""
+          )
+        }
+
+        // ✅ close modal
+        setShowProfileCompletionModal(false)
 
       } else {
         alert("Failed to save profile")
