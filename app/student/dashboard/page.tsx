@@ -223,7 +223,7 @@ export default function StudentDashboard() {
           StudentAuthManager.setAuth(
             updatedStudent,
             authData.student.enrollment_number,
-            ""
+            authData.password   // ✅ use real password
           )
         }
 
