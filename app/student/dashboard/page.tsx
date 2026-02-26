@@ -88,10 +88,12 @@ export default function StudentDashboard() {
 
   // ✅ Check profile completion
   useEffect(() => {
-    if (student) {
-      setShowProfileCompletionModal(!student.profile_completed)
+    if (student?.profile_completed === false) {
+      setShowProfileCompletionModal(true)
+    } else {
+      setShowProfileCompletionModal(false)
     }
-  }, [student])
+  }, [student?.profile_completed])
 
   const fetchStudentData = async (studentId: number) => {
     try {
@@ -108,7 +110,11 @@ export default function StudentDashboard() {
             setStudent(studentData.student)
             const authData = StudentAuthManager.getAuth()
             if (authData) {
-              StudentAuthManager.setAuth(studentData.student, authData.student.enrollment_number, "")
+              StudentAuthManager.setAuth(
+                studentData.student,
+                authData.student.enrollment_number,
+                authData.password   // ✅ use real password
+              )
             }
           }
         }
@@ -206,29 +212,12 @@ export default function StudentDashboard() {
 
       if (data.success) {
 
-        const updatedStudent = {
-          ...student!,
-          caste,
-          gender,
-          profile_completed: true
-        }
+        // ✅ fetch fresh data from database
+        await fetchStudentData(student!.id)
 
-        // ✅ update state
-        setStudent(updatedStudent)
-
-        // ✅ VERY IMPORTANT — update auth storage
-        const authData = StudentAuthManager.getAuth()
-
-        if (authData) {
-          StudentAuthManager.setAuth(
-            updatedStudent,
-            authData.student.enrollment_number,
-            authData.password   // ✅ use real password
-          )
-        }
-
-        // ✅ close modal
+        // close modal
         setShowProfileCompletionModal(false)
+
 
       } else {
         alert("Failed to save profile")
