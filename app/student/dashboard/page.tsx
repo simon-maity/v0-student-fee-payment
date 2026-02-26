@@ -67,6 +67,12 @@ export default function StudentDashboard() {
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [attendanceRefresh, setAttendanceRefresh] = useState(0)
 
+  // ✅ Profile completion modal state
+  const [showProfileCompletionModal, setShowProfileCompletionModal] = useState(false)
+  const [caste, setCaste] = useState("")
+  const [gender, setGender] = useState("")
+  const [savingProfile, setSavingProfile] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -80,6 +86,13 @@ export default function StudentDashboard() {
     fetchStudentData(authData.student.id)
   }, [router])
 
+  // ✅ Check profile completion
+  useEffect(() => {
+    if (student && !student.profile_completed) {
+      setShowProfileCompletionModal(true)
+    }
+  }, [student])
+
   const fetchStudentData = async (studentId: number) => {
     try {
       const headers = StudentAuthManager.getAuthHeaders()
@@ -88,7 +101,7 @@ export default function StudentDashboard() {
         // --- FIX: CHANGED FROM /api/admin/students TO /api/student ---
         // Students cannot access Admin APIs.
         const studentRes = await fetch(`/api/student/${studentId}`, { headers })
-        
+
         if (studentRes.ok) {
           const studentData = await studentRes.json()
           if (studentData.success) {
@@ -160,6 +173,58 @@ export default function StudentDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // ✅ Save caste & gender
+  const handleProfileCompletionSave = async () => {
+
+    if (!caste || !gender) {
+      alert("Please select caste and gender")
+      return
+    }
+
+    setSavingProfile(true)
+
+    try {
+
+      const headers = StudentAuthManager.getAuthHeaders()
+
+      const response = await fetch("/api/student/profile", {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          studentId: student?.id,
+          caste,
+          gender
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+
+        setShowProfileCompletionModal(false)
+
+        setStudent({
+          ...student!,
+          caste,
+          gender,
+          profile_completed: true
+        })
+
+      } else {
+        alert("Failed to save profile")
+      }
+
+    } catch (error) {
+      console.error(error)
+      alert("Error saving profile")
+    }
+
+    setSavingProfile(false)
   }
 
   const handleDismissBroadcast = (id: number) => {
@@ -260,9 +325,8 @@ export default function StudentDashboard() {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`w-6 h-6 cursor-pointer transition-colors ${
-              star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 hover:text-yellow-300"
-            }`}
+            className={`w-6 h-6 cursor-pointer transition-colors ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 hover:text-yellow-300"
+              }`}
             onClick={() => onRatingChange?.(star)}
           />
         ))}
@@ -532,19 +596,19 @@ export default function StudentDashboard() {
                   <Button
                     key={index}
                     className="w-full admin-button justify-start text-xs sm:text-sm h-8 sm:h-10"
-                onClick={() => {
-                  if (action.id === "exams") {
-                    router.push("/student/exams")
-                  } else if (action.id === "academics") {
-                    router.push("/student/academics")
-                  } else if (action.id === "fees") {
-                    router.push("/student/fees")
-                  } else if (action.id === "contact") {
-                    window.location.href = "/student/contact"
-                  } else {
-                    setActiveModal(action.id)
-                  }
-                }}
+                    onClick={() => {
+                      if (action.id === "exams") {
+                        router.push("/student/exams")
+                      } else if (action.id === "academics") {
+                        router.push("/student/academics")
+                      } else if (action.id === "fees") {
+                        router.push("/student/fees")
+                      } else if (action.id === "contact") {
+                        window.location.href = "/student/contact"
+                      } else {
+                        setActiveModal(action.id)
+                      }
+                    }}
                   >
                     <action.icon className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
                     <span className="truncate">{action.label}</span>
@@ -697,8 +761,8 @@ export default function StudentDashboard() {
                                   <div className="font-semibold hover:underline">{company.name}</div>
                                   <div className="text-sm text-muted-foreground">
                                     {company.targeting_mode === "course_semester" &&
-                                    company.course_name &&
-                                    company.semester
+                                      company.course_name &&
+                                      company.semester
                                       ? `${company.course_name} • Semester ${company.semester}`
                                       : company.interest_name}
                                   </div>
@@ -1481,8 +1545,8 @@ export default function StudentDashboard() {
                                     </button>
                                     <div className="text-sm text-muted-foreground">
                                       {company.targeting_mode === "course_semester" &&
-                                      company.course_name &&
-                                      company.semester
+                                        company.course_name &&
+                                        company.semester
                                         ? `${company.course_name} • Semester ${company.semester}`
                                         : company.interest_name}
                                     </div>
@@ -1845,6 +1909,64 @@ export default function StudentDashboard() {
           onOpenChange={setAnnouncementsModalOpen}
           announcements={broadcasts.filter((b) => !dismissedBroadcasts.has(b.id))}
         />
+
+        {/* ✅ Profile Completion Mandatory Modal */}
+
+        <Dialog open={showProfileCompletionModal}>
+
+          <DialogContent className="max-w-md">
+
+            <DialogHeader>
+              <DialogTitle>Complete Your Profile</DialogTitle>
+              <DialogDescription>
+                Please select your caste and gender to continue
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+
+              <div>
+                <Label>Caste</Label>
+                <select
+                  className="w-full border rounded-md p-2"
+                  value={caste}
+                  onChange={(e) => setCaste(e.target.value)}
+                >
+                  <option value="">Select caste</option>
+                  <option value="ST">ST</option>
+                  <option value="SC">SC</option>
+                  <option value="OBC">OBC</option>
+                  <option value="GENERAL">GENERAL</option>
+                </select>
+              </div>
+
+              <div>
+                <Label>Gender</Label>
+                <select
+                  className="w-full border rounded-md p-2"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Transgender">Transgender</option>
+                </select>
+              </div>
+
+              <Button
+                onClick={handleProfileCompletionSave}
+                disabled={savingProfile}
+                className="w-full"
+              >
+                {savingProfile ? "Saving..." : "Save & Continue"}
+              </Button>
+
+            </div>
+
+          </DialogContent>
+
+        </Dialog>
       </div>
     </div>
   )
