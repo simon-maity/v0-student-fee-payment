@@ -38,6 +38,7 @@ import {
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { FeeCategoryModal } from "@/components/fee-category-modal"
 
 // --- Types (Preserved) ---
 export type Student = {
@@ -60,6 +61,7 @@ export type Student = {
   password: string
   created_at: string
   interests?: { id: number; name: string }[]
+  fee_category?: string
 }
 
 interface Course {
@@ -139,6 +141,10 @@ export default function StudentsPage() {
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false)
   const [messageForm, setMessageForm] = useState({ title: "", content: "" })
   const [isSendingMessage, setIsSendingMessage] = useState(false)
+
+  // Fee Category Modal State
+  const [isFeeCategoryModalOpen, setIsFeeCategoryModalOpen] = useState(false)
+  const [selectedStudentForFeeCategory, setSelectedStudentForFeeCategory] = useState<Student | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -484,6 +490,41 @@ export default function StudentsPage() {
     } catch { alert("Failed to copy QR link") }
   }
 
+  const getFeeCategoryColor = (category?: string): string => {
+    switch (category) {
+      case "SCHOLARSHIP":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
+      case "FREESHIP":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+      case "EWS":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+      default:
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+    }
+  }
+
+  const openFeeCategoryModal = (student: Student) => {
+    setSelectedStudentForFeeCategory(student)
+    setIsFeeCategoryModalOpen(true)
+  }
+
+  const handleFeeCategoryUpdate = (newCategory: string) => {
+    if (selectedStudentForFeeCategory) {
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.id === selectedStudentForFeeCategory.id
+            ? { ...s, fee_category: newCategory }
+            : s
+        )
+      )
+      setViewStudent((prev) =>
+        prev && prev.id === selectedStudentForFeeCategory.id
+          ? { ...prev, fee_category: newCategory }
+          : prev
+      )
+    }
+  }
+
   const maxSemestersForFilter = courses.find((c) => c.id.toString() === selectedCourse)?.total_semesters || 0
   const maxSemestersForForm = courses.find((c) => c.id.toString() === formData.course_id)?.total_semesters || 0
 
@@ -711,6 +752,7 @@ export default function StudentsPage() {
                                 <TableHead>Code</TableHead>
                                 <TableHead>Enrollment</TableHead>
                                 <TableHead>Course Info</TableHead>
+                                <TableHead>Fee Type</TableHead>
                                 <TableHead>Placement</TableHead>
                                 <TableHead>Interests</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
@@ -729,6 +771,16 @@ export default function StudentsPage() {
                                     <TableCell>
                                         <div className="text-sm font-medium">{student.course_name}</div>
                                         <div className="text-xs text-muted-foreground">Sem {student.current_semester}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => openFeeCategoryModal(student)}
+                                          className={`text-xs ${getFeeCategoryColor(student.fee_category)}`}
+                                        >
+                                          {student.fee_category || "GENERAL"}
+                                        </Button>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={student.placement_status === 'Placed' ? 'default' : 'secondary'} className={student.placement_status === 'Placed' ? 'bg-emerald-600' : ''}>
@@ -790,6 +842,7 @@ export default function StudentsPage() {
                                 <div><Label className="text-muted-foreground text-xs uppercase">Parent Phone</Label><p className="font-medium">{viewStudent.parent_phone_number}</p></div>
                                 <div><Label className="text-muted-foreground text-xs uppercase">Semesters</Label><p className="font-medium">Adm: {viewStudent.admission_semester} | Curr: {viewStudent.current_semester}</p></div>
                                 <div><Label className="text-muted-foreground text-xs uppercase">Placement</Label><Badge className={viewStudent.placement_status === 'Placed' ? 'bg-emerald-600' : ''}>{viewStudent.placement_status}</Badge></div>
+                                <div><Label className="text-muted-foreground text-xs uppercase">Fee Category</Label><Badge className={getFeeCategoryColor(viewStudent.fee_category)}>{viewStudent.fee_category || 'GENERAL'}</Badge></div>
                                 {viewStudent.company_name && <div><Label className="text-muted-foreground text-xs uppercase">Company</Label><p className="font-medium">{viewStudent.company_name}</p></div>}
                             </div>
                             <div className="flex gap-4">
@@ -865,6 +918,17 @@ export default function StudentsPage() {
             </DialogContent>
         </Dialog>
 
+        {/* Fee Category Modal */}
+        {selectedStudentForFeeCategory && (
+          <FeeCategoryModal
+            open={isFeeCategoryModalOpen}
+            onOpenChange={setIsFeeCategoryModalOpen}
+            studentId={selectedStudentForFeeCategory.id}
+            studentName={selectedStudentForFeeCategory.full_name}
+            currentCategory={selectedStudentForFeeCategory.fee_category || "GENERAL"}
+            onUpdate={handleFeeCategoryUpdate}
+          />
+        )}
       </motion.div>
     </div>
   )
