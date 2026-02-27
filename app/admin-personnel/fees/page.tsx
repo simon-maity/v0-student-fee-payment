@@ -66,9 +66,9 @@ export default function AdminPersonnelFeesPage() {
 
   const searchStudent = async () => {
     if (!searchTerm.trim()) {
-      const typeLabel = 
+      const typeLabel =
         searchType === "enrollment" ? "enrollment number" :
-        searchType === "uniqueCode" ? "unique code" : "transaction ID"
+          searchType === "uniqueCode" ? "unique code" : "transaction ID"
       toast({
         title: "Error",
         description: `Please enter a ${typeLabel}`,
@@ -80,7 +80,7 @@ export default function AdminPersonnelFeesPage() {
     setLoading(true)
     try {
       let url = "/api/admin-personnel/student-fees?"
-      
+
       if (searchType === "enrollment") {
         url += `enrollment=${searchTerm}`
       } else if (searchType === "uniqueCode") {
@@ -95,7 +95,7 @@ export default function AdminPersonnelFeesPage() {
       if (response.ok) {
         setStudent(data.student)
         setFeeDetails(data.feeDetails)
-        
+
         // Fetch payment history
         const historyResponse = await fetch(`/api/admin-personnel/payment-history?studentId=${data.student.id}`)
         const historyData = await historyResponse.json()
@@ -303,31 +303,28 @@ export default function AdminPersonnelFeesPage() {
             <div className="flex gap-2 border-b">
               <button
                 onClick={() => setSearchType("enrollment")}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                  searchType === "enrollment"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "enrollment"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Enrollment Number
               </button>
               <button
                 onClick={() => setSearchType("uniqueCode")}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                  searchType === "uniqueCode"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "uniqueCode"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Unique Code
               </button>
               <button
                 onClick={() => setSearchType("transactionId")}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                  searchType === "transactionId"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "transactionId"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Transaction ID
               </button>
@@ -338,8 +335,8 @@ export default function AdminPersonnelFeesPage() {
               <Input
                 placeholder={
                   searchType === "enrollment" ? "Enter Enrollment Number (e.g., 2021001)" :
-                  searchType === "uniqueCode" ? "Enter Unique Code" :
-                  "Enter Transaction ID"
+                    searchType === "uniqueCode" ? "Enter Unique Code" :
+                      "Enter Transaction ID"
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -408,10 +405,18 @@ export default function AdminPersonnelFeesPage() {
                             ₹{(fee.semester_fee + fee.exam_fee).toLocaleString()}
                           </td>
                           <td className="text-right p-2 text-green-600">
-                            ₹{(fee.semester_paid + fee.exam_paid).toLocaleString()}
+                            ₹{paymentHistory
+                              .filter((p) => p.semester === fee.semester)
+                              .reduce((sum, p) => sum + p.amount, 0)
+                              .toLocaleString()}
                           </td>
                           <td className="text-right p-2 text-red-600">
-                            ₹{(fee.semester_pending + fee.exam_pending).toLocaleString()}
+                            ₹{(
+                              fee.semester_fee + fee.exam_fee -
+                              paymentHistory
+                                .filter((p) => p.semester === fee.semester)
+                                .reduce((sum, p) => sum + p.amount, 0)
+                            ).toLocaleString()}
                           </td>
                         </tr>
                       ))}
