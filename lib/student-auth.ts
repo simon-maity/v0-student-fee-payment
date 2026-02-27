@@ -78,30 +78,37 @@ export class StudentAuthManager {
   }
 
   static setAuth(student: any, enrollment: string, password: string) {
+
     try {
-      if (!enrollment || !password) {
-        console.error("[v0] StudentAuthManager.setAuth: Missing enrollment or password", {
-          enrollmentLength: enrollment?.length,
-          passwordLength: password?.length,
-        })
+
+      if (!student || !enrollment) {
+        console.error("[v0] StudentAuthManager.setAuth: Missing student or enrollment")
         return
       }
 
-      console.log("[v0] StudentAuthManager.setAuth called with valid credentials")
-      
-      // Store student data
+      console.log("[v0] Saving fresh student auth")
+
+      // ALWAYS store latest student from database
       localStorage.setItem(this.AUTH_KEY, JSON.stringify(student))
-      localStorage.setItem(this.CREDENTIALS_KEY, JSON.stringify({ enrollment, password }))
-      
-      // Generate and save Bearer token in base64 format (enrollment:password)
-      const tokenData = `${enrollment}:${password}`
-      const token = btoa(tokenData)  // Use standard btoa for browser compatibility
-      localStorage.setItem("studentToken", token)
-      
-      console.log("[v0] Student auth complete. Token length:", token.length)
+
+      // Store credentials ONLY if password exists
+      if (password && password.length > 0) {
+        localStorage.setItem(
+          this.CREDENTIALS_KEY,
+          JSON.stringify({ enrollment, password })
+        )
+
+        const tokenData = `${enrollment}:${password}`
+        const token = btoa(tokenData)
+        localStorage.setItem("studentToken", token)
+      }
+
+      console.log("[v0] Student auth saved successfully")
+
     } catch (error) {
       console.error("[v0] StudentAuthManager.setAuth error:", error)
     }
+
   }
 
   static getAuth() {
