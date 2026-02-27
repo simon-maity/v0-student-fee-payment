@@ -374,7 +374,7 @@ export default function UpdatePayment() {
 
                   if (searchType === "name" && value.length >= 2) {
 
-                    const res = await fetch(`/api/students/search?q=${value}`)
+                    const res = await fetch(`/api/student/search?q=${value}`)
                     const data = await res.json()
 
                     if (data.success) {
