@@ -304,8 +304,8 @@ export default function AdminPersonnelFeesPage() {
               <button
                 onClick={() => setSearchType("enrollment")}
                 className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "enrollment"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
                   }`}
               >
                 Enrollment Number
@@ -313,8 +313,8 @@ export default function AdminPersonnelFeesPage() {
               <button
                 onClick={() => setSearchType("uniqueCode")}
                 className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "uniqueCode"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
                   }`}
               >
                 Unique Code
@@ -322,8 +322,8 @@ export default function AdminPersonnelFeesPage() {
               <button
                 onClick={() => setSearchType("transactionId")}
                 className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "transactionId"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
                   }`}
               >
                 Transaction ID
