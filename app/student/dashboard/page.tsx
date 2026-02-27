@@ -87,13 +87,29 @@ export default function StudentDashboard() {
   }, [router])
 
   // ✅ Check profile completion
+  // ✅ Check profile completion using caste and gender (FINAL FIX)
   useEffect(() => {
-    if (student?.profile_completed === false) {
+
+    if (!student) return
+
+    console.log("Student caste:", student.caste)
+    console.log("Student gender:", student.gender)
+
+    if (!student.caste || !student.gender) {
+
+      console.log("Opening profile completion modal")
+
       setShowProfileCompletionModal(true)
+
     } else {
+
+      console.log("Profile complete, closing modal")
+
       setShowProfileCompletionModal(false)
+
     }
-  }, [student?.profile_completed])
+
+  }, [student])
 
   const fetchStudentData = async (studentId: number) => {
     try {
