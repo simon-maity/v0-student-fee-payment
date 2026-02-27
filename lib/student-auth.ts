@@ -78,83 +78,107 @@ export class StudentAuthManager {
   }
 
   static setAuth(student: any, enrollment: string, password: string) {
+
     try {
-      if (!enrollment || !password) {
-        console.error("[v0] StudentAuthManager.setAuth: Missing enrollment or password", {
-          enrollmentLength: enrollment?.length,
-          passwordLength: password?.length,
-        })
+
+      if (!student || !enrollment) {
+        console.error("[v0] StudentAuthManager.setAuth: Missing student or enrollment")
         return
       }
 
-      console.log("[v0] StudentAuthManager.setAuth called with valid credentials")
-      
-      // Store student data
+      console.log("[v0] Saving fresh student auth")
+
+      // ALWAYS store latest student from database
       localStorage.setItem(this.AUTH_KEY, JSON.stringify(student))
-      localStorage.setItem(this.CREDENTIALS_KEY, JSON.stringify({ enrollment, password }))
-      
-      // Generate and save Bearer token in base64 format (enrollment:password)
-      const tokenData = `${enrollment}:${password}`
-      const token = btoa(tokenData)  // Use standard btoa for browser compatibility
-      localStorage.setItem("studentToken", token)
-      
-      console.log("[v0] Student auth complete. Token length:", token.length)
+
+      // Store credentials ONLY if password exists
+      if (password && password.length > 0) {
+        localStorage.setItem(
+          this.CREDENTIALS_KEY,
+          JSON.stringify({ enrollment, password })
+        )
+
+        const tokenData = `${enrollment}:${password}`
+        const token = btoa(tokenData)
+        localStorage.setItem("studentToken", token)
+      }
+
+      console.log("[v0] Student auth saved successfully")
+
     } catch (error) {
       console.error("[v0] StudentAuthManager.setAuth error:", error)
     }
+
+  }
+
+      console.log("[v0] StudentAuthManager.setAuth called with valid credentials")
+
+      // Store student data
+      localStorage.setItem(this.AUTH_KEY, JSON.stringify(student))
+localStorage.setItem(this.CREDENTIALS_KEY, JSON.stringify({ enrollment, password }))
+
+// Generate and save Bearer token in base64 format (enrollment:password)
+const tokenData = `${enrollment}:${password}`
+const token = btoa(tokenData)  // Use standard btoa for browser compatibility
+localStorage.setItem("studentToken", token)
+
+console.log("[v0] Student auth complete. Token length:", token.length)
+    } catch (error) {
+  console.error("[v0] StudentAuthManager.setAuth error:", error)
+}
   }
 
   static getAuth() {
-    try {
-      const studentData = localStorage.getItem(this.AUTH_KEY)
-      const credentialsData = localStorage.getItem(this.CREDENTIALS_KEY)
-      const token = localStorage.getItem("studentToken")
+  try {
+    const studentData = localStorage.getItem(this.AUTH_KEY)
+    const credentialsData = localStorage.getItem(this.CREDENTIALS_KEY)
+    const token = localStorage.getItem("studentToken")
 
-      if (!studentData || !credentialsData) return null
+    if (!studentData || !credentialsData) return null
 
-      return {
-        student: JSON.parse(studentData),
-        credentials: JSON.parse(credentialsData),
-        token: token,
-      }
-    } catch (error) {
-      console.error("[v0] Error getting auth:", error)
-      return null
+    return {
+      student: JSON.parse(studentData),
+      credentials: JSON.parse(credentialsData),
+      token: token,
     }
+  } catch (error) {
+    console.error("[v0] Error getting auth:", error)
+    return null
   }
+}
 
   static clearAuth() {
-    localStorage.removeItem(this.AUTH_KEY)
-    localStorage.removeItem(this.CREDENTIALS_KEY)
-  }
+  localStorage.removeItem(this.AUTH_KEY)
+  localStorage.removeItem(this.CREDENTIALS_KEY)
+}
 
   static getAuthHeaders() {
-    try {
-      const credentialsData = localStorage.getItem(this.CREDENTIALS_KEY)
-      if (!credentialsData) {
-        return {}
-      }
-
-      const { enrollment, password } = JSON.parse(credentialsData)
-
-      if (!enrollment || !password) {
-        return {}
-      }
-
-      const credentials = `${enrollment}:${password}`
-      const encodedToken = this.base64Encode(credentials)
-
-      if (!encodedToken) {
-        return {}
-      }
-
-      return {
-        Authorization: `Bearer ${encodedToken}`,
-        "Content-Type": "application/json",
-      }
-    } catch (error) {
-      console.error("[v0] Error creating auth headers:", error)
+  try {
+    const credentialsData = localStorage.getItem(this.CREDENTIALS_KEY)
+    if (!credentialsData) {
       return {}
     }
+
+    const { enrollment, password } = JSON.parse(credentialsData)
+
+    if (!enrollment || !password) {
+      return {}
+    }
+
+    const credentials = `${enrollment}:${password}`
+    const encodedToken = this.base64Encode(credentials)
+
+    if (!encodedToken) {
+      return {}
+    }
+
+    return {
+      Authorization: `Bearer ${encodedToken}`,
+      "Content-Type": "application/json",
+    }
+  } catch (error) {
+    console.error("[v0] Error creating auth headers:", error)
+    return {}
   }
+}
 }

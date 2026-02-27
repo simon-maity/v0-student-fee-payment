@@ -112,8 +112,8 @@ export default function StudentDashboard() {
             if (authData) {
               StudentAuthManager.setAuth(
                 studentData.student,
-                authData.student.enrollment_number,
-                authData.password   // ✅ use real password
+                authData.credentials.enrollment,
+                authData.credentials.password
               )
             }
           }
