@@ -38,6 +38,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         s.placement_tenure_days,
         s.unique_code,
         s.created_at,
+
+            -- ✅ ADD THESE 3 FIELDS
+        s.caste,
+        s.gender,
+        s.profile_completed,
         c.name as course_name
       FROM students s
       LEFT JOIN courses c ON s.course_id = c.id
