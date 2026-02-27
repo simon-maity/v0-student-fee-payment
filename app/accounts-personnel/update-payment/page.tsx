@@ -40,7 +40,7 @@ interface PaymentHistory {
 }
 
 export default function UpdatePayment() {
-  const [searchType, setSearchType] = useState<"enrollment" | "uniqueCode" | "transactionId">("enrollment")
+  const [searchType, setSearchType] = useState<"enrollment" | "uniqueCode" | "transactionId" | "name">("enrollment")
   const [searchTerm, setSearchTerm] = useState("")
   const [student, setStudent] = useState<Student | null>(null)
   const [feeDetails, setFeeDetails] = useState<FeeStructure[]>([])
@@ -63,12 +63,14 @@ export default function UpdatePayment() {
     notes: "",
   })
   const { toast } = useToast()
+  const [nameResults, setNameResults] = useState<Student[]>([])
+  const [showNameDropdown, setShowNameDropdown] = useState(false)
 
   const searchStudent = async () => {
     if (!searchTerm.trim()) {
-      const typeLabel = 
+      const typeLabel =
         searchType === "enrollment" ? "enrollment number" :
-        searchType === "uniqueCode" ? "unique code" : "transaction ID"
+          searchType === "uniqueCode" ? "unique code" : "transaction ID"
       toast({
         title: "Error",
         description: `Please enter a ${typeLabel}`,
@@ -80,7 +82,7 @@ export default function UpdatePayment() {
     setLoading(true)
     try {
       let url = "/api/accounts-personnel/student-fees?"
-      
+
       if (searchType === "enrollment") {
         url += `enrollment=${searchTerm}`
       } else if (searchType === "uniqueCode") {
@@ -95,7 +97,7 @@ export default function UpdatePayment() {
       if (response.ok) {
         setStudent(data.student)
         setFeeDetails(data.feeDetails)
-        
+
         // Fetch payment history
         const historyResponse = await fetch(`/api/accounts-personnel/payment-history?studentId=${data.student.id}`)
         const historyData = await historyResponse.json()
@@ -320,33 +322,39 @@ export default function UpdatePayment() {
             <div className="flex gap-2 border-b">
               <button
                 onClick={() => setSearchType("enrollment")}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                  searchType === "enrollment"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "enrollment"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Enrollment Number
               </button>
               <button
                 onClick={() => setSearchType("uniqueCode")}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                  searchType === "uniqueCode"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "uniqueCode"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Unique Code
               </button>
               <button
                 onClick={() => setSearchType("transactionId")}
-                className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-                  searchType === "transactionId"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "transactionId"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
               >
                 Transaction ID
+              </button>
+              <button
+                onClick={() => setSearchType("name")}
+                className={`px-4 py-2 font-medium border-b-2 transition-colors ${searchType === "name"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  }`}
+              >
+                Name
               </button>
             </div>
 
@@ -355,17 +363,80 @@ export default function UpdatePayment() {
               <Input
                 placeholder={
                   searchType === "enrollment" ? "Enter Enrollment Number (e.g., 2021001)" :
-                  searchType === "uniqueCode" ? "Enter Unique Code" :
-                  "Enter Transaction ID"
+                    searchType === "uniqueCode" ? "Enter Unique Code" :
+                      "Enter Transaction ID"
                 }
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={async (e) => {
+
+                  const value = e.target.value
+                  setSearchTerm(value)
+
+                  if (searchType === "name" && value.length >= 2) {
+
+                    const res = await fetch(`/api/students/search?q=${value}`)
+                    const data = await res.json()
+
+                    if (data.success) {
+                      setNameResults(data.students)
+                      setShowNameDropdown(true)
+                    }
+
+                  } else {
+                    setShowNameDropdown(false)
+                  }
+
+                }}
                 onKeyDown={(e) => e.key === "Enter" && searchStudent()}
               />
               <Button onClick={searchStudent} disabled={loading}>
                 <Search className="h-4 w-4 mr-2" />
                 Search
               </Button>
+              {showNameDropdown && nameResults.length > 0 && (
+
+                <div className="absolute top-12 left-0 w-full bg-white border rounded-md shadow-md z-50">
+
+                  {nameResults.map((s) => (
+
+                    <div
+                      key={s.id}
+                      onClick={() => {
+
+                        setSearchTerm(s.name)
+                        setShowNameDropdown(false)
+
+                        fetch(`/api/accounts-personnel/student-fees?enrollment=${s.enrollment_number}`)
+                          .then(res => res.json())
+                          .then(data => {
+
+                            if (data.student) {
+
+                              setStudent(data.student)
+                              setFeeDetails(data.feeDetails)
+
+                              fetch(`/api/accounts-personnel/payment-history?studentId=${data.student.id}`)
+                                .then(res => res.json())
+                                .then(history => {
+                                  setPaymentHistory(history.paymentHistory || [])
+                                })
+
+                            }
+
+                          })
+
+                      }}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <div className="font-medium">{s.name}</div>
+                      <div className="text-sm text-gray-500">{s.enrollment_number}</div>
+                    </div>
+
+                  ))}
+
+                </div>
+
+              )}
             </div>
           </CardContent>
         </Card>
@@ -425,19 +496,19 @@ export default function UpdatePayment() {
                             ₹{(fee.semester_fee + fee.exam_fee).toLocaleString()}
                           </td>
                           <td className="text-right p-2 text-green-600">
-  ₹{paymentHistory
-    .filter((p) => p.semester === fee.semester)
-    .reduce((sum, p) => sum + p.amount, 0)
-    .toLocaleString()}
-</td>
-<td className="text-right p-2 text-red-600">
-  ₹{(
-    fee.semester_fee + fee.exam_fee - 
-    paymentHistory
-      .filter((p) => p.semester === fee.semester)
-      .reduce((sum, p) => sum + p.amount, 0)
-  ).toLocaleString()}
-</td>
+                            ₹{paymentHistory
+                              .filter((p) => p.semester === fee.semester)
+                              .reduce((sum, p) => sum + p.amount, 0)
+                              .toLocaleString()}
+                          </td>
+                          <td className="text-right p-2 text-red-600">
+                            ₹{(
+                              fee.semester_fee + fee.exam_fee -
+                              paymentHistory
+                                .filter((p) => p.semester === fee.semester)
+                                .reduce((sum, p) => sum + p.amount, 0)
+                            ).toLocaleString()}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
